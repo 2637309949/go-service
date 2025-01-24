@@ -16,7 +16,7 @@ func main() {
 		micro.Registry(registry),
 	)
 	service.Init()
-	pbUser.RegisterGreeterHandler(service.Server(), new(handler.Handler))
+	pbUser.RegisterHandlerHandler(service.Server(), new(handler.Handler))
 
 	if err := service.Run(); err != nil {
 		log.Fatalf("Failed to run service: %v", err)

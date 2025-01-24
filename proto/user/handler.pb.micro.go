@@ -27,32 +27,32 @@ var _ context.Context
 var _ client.Option
 var _ server.Option
 
-// Api Endpoints for Greeter service
+// Api Endpoints for Handler service
 
-func NewGreeterEndpoints() []*registry.Endpoint {
+func NewHandlerEndpoints() []*registry.Endpoint {
 	return []*registry.Endpoint{}
 }
 
-// Client API for Greeter service
+// Client API for Handler service
 
-type GreeterService interface {
+type HandlerService interface {
 	Hello(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
 }
 
-type greeterService struct {
+type handlerService struct {
 	c    client.Client
 	name string
 }
 
-func NewGreeterService(name string, c client.Client) GreeterService {
-	return &greeterService{
+func NewHandlerService(name string, c client.Client) HandlerService {
+	return &handlerService{
 		c:    c,
 		name: name,
 	}
 }
 
-func (c *greeterService) Hello(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error) {
-	req := c.c.NewRequest(c.name, "Greeter.Hello", in)
+func (c *handlerService) Hello(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error) {
+	req := c.c.NewRequest(c.name, "Handler.Hello", in)
 	out := new(Response)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
@@ -61,27 +61,27 @@ func (c *greeterService) Hello(ctx context.Context, in *Request, opts ...client.
 	return out, nil
 }
 
-// Server API for Greeter service
+// Server API for Handler service
 
-type GreeterHandler interface {
+type HandlerHandler interface {
 	Hello(context.Context, *Request, *Response) error
 }
 
-func RegisterGreeterHandler(s server.Server, hdlr GreeterHandler, opts ...server.HandlerOption) error {
-	type greeter interface {
+func RegisterHandlerHandler(s server.Server, hdlr HandlerHandler, opts ...server.HandlerOption) error {
+	type handler interface {
 		Hello(ctx context.Context, in *Request, out *Response) error
 	}
-	type Greeter struct {
-		greeter
+	type Handler struct {
+		handler
 	}
-	h := &greeterHandler{hdlr}
-	return s.Handle(s.NewHandler(&Greeter{h}, opts...))
+	h := &handlerHandler{hdlr}
+	return s.Handle(s.NewHandler(&Handler{h}, opts...))
 }
 
-type greeterHandler struct {
-	GreeterHandler
+type handlerHandler struct {
+	HandlerHandler
 }
 
-func (h *greeterHandler) Hello(ctx context.Context, in *Request, out *Response) error {
-	return h.GreeterHandler.Hello(ctx, in, out)
+func (h *handlerHandler) Hello(ctx context.Context, in *Request, out *Response) error {
+	return h.HandlerHandler.Hello(ctx, in, out)
 }

@@ -1,1 +1,1 @@
-curl -X GET "http://127.0.0.1:8080/user/Greeter/Hello?name=test"
+curl -X GET "http://127.0.0.1:8080/user/handler/Hello?name=test"

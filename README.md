@@ -14,4 +14,3 @@ Also required:
 - [protoc](https://github.com/google/protobuf)
 - [protoc-gen-go](https://google.golang.org/protobuf)
 
-protoc --plugin=protoc-gen-go=$GOPATH/bin/protoc-gen-go --plugin=protoc-gen-micro=$GOPATH/bin/protoc-gen-micro --proto_path=. --micro_out=. --go_out=. greeter.proto
