@@ -15,7 +15,7 @@ import (
 // Paths for packages used by code generated in this file,
 // relative to the import_prefix of the generator.Generator.
 const (
-	apiPkgPath     = "go-micro.dev/v5/api"
+	apiPkgPath     = "go-micro.dev/v5/registry"
 	contextPkgPath = "context"
 	clientPkgPath  = "go-micro.dev/v5/client"
 	serverPkgPath  = "go-micro.dev/v5/server"
@@ -50,7 +50,7 @@ var (
 // Init initializes the plugin.
 func (g *micro) Init(gen *generator.Generator) {
 	g.gen = gen
-	apiPkg = generator.RegisterUniquePackageName("api", nil)
+	apiPkg = generator.RegisterUniquePackageName("registry", nil)
 	contextPkg = generator.RegisterUniquePackageName("context", nil)
 	clientPkg = generator.RegisterUniquePackageName("client", nil)
 	serverPkg = generator.RegisterUniquePackageName("server", nil)

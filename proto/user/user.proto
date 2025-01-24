@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option go_package = "/;user";
+
+message Request {
+	string name = 1;
+}
+
+message Response {
+	string greeting = 2;
+}

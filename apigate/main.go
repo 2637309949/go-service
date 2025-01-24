@@ -7,7 +7,7 @@ import (
 	"io"
 
 	"github.com/micro/plugins/v5/registry/consul"
-
+	"net/http"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"go-micro.dev/v5/client"
@@ -32,7 +32,7 @@ func main() {
 		AllowHeaders:    []string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "Micro-Namespace"},
 	}))
 	r.GET("/", func(c *gin.Context) {
-		c.JSON(200, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"version": "1.0",
 		})
 	})
