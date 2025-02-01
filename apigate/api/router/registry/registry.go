@@ -12,11 +12,12 @@ import (
 	"apigate/api"
 	"apigate/api/router"
 
+	"apigate/api/util/namespace"
+
 	"go-micro.dev/v5/logger"
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/registry/cache"
 	"micro.dev/v4/service/context"
-	"micro.dev/v4/util/namespace"
 	util "micro.dev/v4/util/router"
 )
 

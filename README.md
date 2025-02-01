@@ -5,8 +5,8 @@ First install protoc. You can do this with either your package manager, or [dire
 Then install `protoc-gen-go` and `protoc-gen-micro`.
 
 ```
-go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 cd ./comm/cmd/protoc-gen-micro && go install && cd ../../../
+cd ./comm/cmd/protobuf-go/cmd/protoc-gen-go && go install && cd ../../../../../
 ```
 
 Also required: 
