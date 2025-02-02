@@ -6,10 +6,11 @@ import (
 	"apigate/router/registry"
 	"io"
 
-	"github.com/micro/plugins/v5/registry/consul"
 	"net/http"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/micro/plugins/v5/registry/consul"
 	"go-micro.dev/v5/client"
 	"go-micro.dev/v5/logger"
 )
