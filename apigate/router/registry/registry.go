@@ -9,10 +9,9 @@ import (
 	"sync"
 	"time"
 
+	"apigate/router"
 	"apigate/api"
-	"apigate/api/router"
-
-	"apigate/api/util/namespace"
+	"apigate/util/namespace"
 
 	"go-micro.dev/v5/logger"
 	"go-micro.dev/v5/registry"

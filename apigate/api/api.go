@@ -26,7 +26,7 @@ import (
 
 	jsonpatch "github.com/evanphx/json-patch/v5"
 
-	"apigate/api/util/qson"
+	"apigate/util/qson"
 
 	"github.com/oxtoacart/bpool"
 	"go-micro.dev/v5/metadata"

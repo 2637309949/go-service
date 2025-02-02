@@ -1,9 +1,9 @@
 package main
 
 import (
-	"apigate/api/handler"
-	"apigate/api/router"
-	"apigate/api/router/registry"
+	"apigate/handler"
+	"apigate/router"
+	"apigate/router/registry"
 	"io"
 
 	"github.com/micro/plugins/v5/registry/consul"

@@ -17,7 +17,7 @@
 package handler
 
 import (
-	"apigate/api/router"
+	"apigate/router"
 
 	"go-micro.dev/v5/client"
 )

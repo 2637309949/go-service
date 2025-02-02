@@ -7,7 +7,7 @@ import (
 	"net/textproto"
 	"strings"
 
-	"apigate/api/router/registry"
+	"apigate/router/registry"
 
 	"github.com/gin-gonic/gin"
 	"go-micro.dev/v5/logger"
