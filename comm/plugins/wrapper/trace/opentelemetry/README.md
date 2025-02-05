@@ -8,7 +8,7 @@ OpenTelemetry wrappers propagate traces (spans) accross services.
 service := micro.NewService(
     micro.Name("go.micro.srv.greeter"),
     micro.WrapClient(opentelemetry.NewClientWrapper()),
-    micro.WrapHandler(open.NewHandlerWrapper()),
+    micro.WrapHandler(opentelemetry.NewHandlerWrapper()),
     micro.WrapSubscriber(opentelemetry.NewSubscriberWrapper()),
 )
 ```

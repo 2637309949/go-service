@@ -4,6 +4,6 @@ option go_package = "/;user";
 
 import "proto/user/user.proto";
 
-service Handler {
+service Endpoint {
 	rpc Hello(Request) returns (Response) {}
 }

@@ -37,8 +37,7 @@ func main() {
 			"version": "1.0",
 		})
 	})
-	r.GET("/favicon.ico", func(c *gin.Context) {
-	})
+	r.GET("/favicon.ico", func(c *gin.Context) {})
 	r.Use(auth())
 	r.NoRoute(func(c *gin.Context) {
 		hd.ServeHTTP(c.Writer, c.Request)

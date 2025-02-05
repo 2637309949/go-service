@@ -10,7 +10,7 @@ var (
 	DefaultLogger Logger = NewLogger()
 
 	// Default logger helper.
-	DefaultHelper *logger.Helper = logger.NewHelper(logger.DefaultLogger)
+	DefaultHelper *Helper = NewHelper(DefaultLogger)
 )
 
 // Logger is a generic logging interface.

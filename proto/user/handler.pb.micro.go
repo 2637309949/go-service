@@ -67,15 +67,15 @@ type HandlerHandler interface {
 	Hello(context.Context, *Request, *Response) error
 }
 
-func RegisterHandlerHandler(s server.Server, hdlr HandlerHandler, opts ...server.HandlerOption) error {
+func RegisterEndpointHandler(s server.Server, hdlr HandlerHandler, opts ...server.HandlerOption) error {
 	type handler interface {
 		Hello(ctx context.Context, in *Request, out *Response) error
 	}
-	type Handler struct {
+	type Endpoint struct {
 		handler
 	}
 	h := &handlerHandler{hdlr}
-	return s.Handle(s.NewHandler(&Handler{h}, opts...))
+	return s.Handle(s.NewHandler(&Endpoint{h}, opts...))
 }
 
 type handlerHandler struct {
