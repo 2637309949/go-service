@@ -38,11 +38,16 @@ func newConsulWatcher(cr *consulRegistry, opts ...registry.WatchOption) (registr
 		watchers: make(map[string]*watch.Plan),
 		services: make(map[string][]*registry.Service),
 	}
+	wpArgs := map[string]interface{}{
+		"type": "services",
+	}
+	// watch only one
+	if len(wo.Service) > 0 {
+		wpArgs["service"] = wo.Service
+		wpArgs["type"] = "service"
+	}
+	wp, err := watch.Parse(wpArgs)
 
-	wp, err := watch.Parse(map[string]interface{}{
-		"service": wo.Service,
-		"type":    "service",
-	})
 	if err != nil {
 		return nil, err
 	}
