@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strings"
@@ -243,7 +242,7 @@ func RequestPayload(r *http.Request) ([]byte, error) {
 			if err != nil {
 				return nil, err
 			}
-			b, err := ioutil.ReadAll(f)
+			b, err := io.ReadAll(f)
 			if err != nil {
 				return nil, err
 			}

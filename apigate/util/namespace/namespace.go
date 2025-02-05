@@ -5,8 +5,8 @@ import (
 	"errors"
 	"strings"
 
-	md "micro.dev/v4/service/context"
-	"micro.dev/v4/service/registry"
+	md "go-micro.dev/v5/metadata"
+	"go-micro.dev/v5/registry"
 	"micro.dev/v4/util/config"
 )
 

@@ -9,15 +9,16 @@ import (
 	"sync"
 	"time"
 
-	"apigate/router"
 	"apigate/api"
+	"apigate/router"
 	"apigate/util/namespace"
 
+	util "apigate/util/router"
+
 	"go-micro.dev/v5/logger"
+	"go-micro.dev/v5/metadata"
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/registry/cache"
-	"micro.dev/v4/service/context"
-	util "micro.dev/v4/util/router"
 )
 
 var (
@@ -473,15 +474,15 @@ endpointLoop:
 				logger.Debugf("api gpath match %s = %v", path, pathreg)
 			}
 			ctx := req.Context()
-			md, ok := context.FromContext(ctx)
+			md, ok := metadata.FromContext(ctx)
 			if !ok {
-				md = make(context.Metadata)
+				md = make(metadata.Metadata)
 			}
 			for k, v := range matches {
 				md[fmt.Sprintf("x-api-field-%s", k)] = v
 			}
 			md["x-api-body"] = ep.Body
-			*req = *req.Clone(context.NewContext(ctx, md))
+			*req = *req.Clone(metadata.NewContext(ctx, md))
 			ret = e
 			break endpointLoop
 		}

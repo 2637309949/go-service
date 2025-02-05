@@ -18,20 +18,21 @@
 package handler
 
 import (
+	"apigate/api"
 	bts "bytes"
 	"encoding/json"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
-	"apigate/api"
+
+	"apigate/util/ctx"
 
 	"go-micro.dev/v5/client"
+	"go-micro.dev/v5/codec/bytes"
+	"go-micro.dev/v5/errors"
 	"go-micro.dev/v5/logger"
-	metadata "micro.dev/v4/service/context"
-	"micro.dev/v4/service/errors"
-	"micro.dev/v4/util/codec/bytes"
-	"micro.dev/v4/util/ctx"
+	"go-micro.dev/v5/metadata"
 )
 
 var (
