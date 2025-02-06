@@ -8,7 +8,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"encoding/json"
 	"apigate/api"
 	"apigate/router"
 	"apigate/util/namespace"
@@ -532,6 +531,8 @@ func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
 	rp := r.resolver.Resolve(req)
 	// service name
 	name := rp.Name
+	path := rp.Path
+	method := rp.Method
 
 	// trigger an endpoint refresh
 	select {
@@ -546,33 +547,47 @@ func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
 	}
 
 	// filter httpapi
-	// httpServices := []*registry.Service{}
+	endpointName := ""
+	httpServices := []*registry.Service{}
 	for i := range services {
 		service := services[i]
-		for e := range service.Endpoints {
-			httpEndpoint := server.Decode(e.Metadata)
+		for j := range service.Endpoints {
+			endpoint := service.Endpoints[j]
+			httpEndpoint := server.Decode(endpoint.Metadata)
 			if httpEndpoint != nil && len(httpEndpoint.Path) > 0 {
 				fmt.Println(66, httpEndpoint.Path)
+				// todo dynamic matching
+				if httpEndpoint.Path == path && contains(httpEndpoint.Method, method) {
+					httpServices = append(httpServices, service)
+					if len(endpointName) == 0 {
+						endpointName = httpEndpoint.Name
+					}
+				}
 			}
 		}
 	}
-
-	// 将结构体转换为 JSON 字符串
-	jsonData, _ := json.Marshal(services)
-
-
-	// 输出 JSON 格式的数据
-	fmt.Println(string(jsonData))
+	if len(httpServices) == 0 || len(endpointName) == 0 {
+		return nil,errors.New("rpc: can't find service Endpoint")
+	}
 
 	// construct api service
 	return &api.Service{
 		Name: name,
 		Endpoint: &api.Endpoint{
-			Name:    rp.Method,
+			Name:    endpointName,
 			Handler: "rpc",
 		},
 		Services: services,
 	}, nil
+}
+
+func contains(slice []string, value string) bool {
+	for _, v := range slice {
+		if v == value {
+			return true
+		}
+	}
+	return false
 }
 
 func newRouter(opts ...router.Option) *registryRouter {
