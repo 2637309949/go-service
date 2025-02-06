@@ -54,6 +54,9 @@ type Endpoint struct {
 	Response *Value            `json:"response"`
 	Metadata map[string]string `json:"metadata"`
 	Name     string            `json:"name"`
+	Handler  string            `json:"handler"`
+	Path     string            `json:"path"`
+	Method   []string		   `json:"method"`
 }
 
 type Value struct {

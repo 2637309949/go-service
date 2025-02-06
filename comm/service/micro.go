@@ -2,10 +2,12 @@ package service
 
 import (
 	"comm/logger"
-
-	"github.com/micro/plugins/v5/registry/consul"
+	"github.com/joho/godotenv"
+	"go-micro.dev/v5/registry"
+    "github.com/micro/plugins/v5/registry/consul"
 	"github.com/micro/plugins/v5/wrapper/trace/opentracing"
 	"go-micro.dev/v5"
+	"os"
 )
 
 type service struct {
@@ -22,7 +24,11 @@ func (s *service) Run() error {
 
 // NewService creates and returns a new Service based on the packages within.
 func NewService(opts ...micro.Option) micro.Service {
-	registry := consul.NewRegistry()
+	registry := consul.NewRegistry(func(op *registry.Options) {
+		op.Addrs = []string{
+			os.Getenv("CONSUL"),
+		}
+	})
 	opts = append(opts, micro.Registry(registry))
 	opts = append(opts, micro.WrapClient(opentracing.NewClientWrapper(nil)))
 	opts = append(opts, micro.WrapHandler(opentracing.NewHandlerWrapper(nil)))
@@ -34,4 +40,12 @@ func NewService(opts ...micro.Option) micro.Service {
 	service.Init()
 	initJaegerTracer(service.Name(), "")
 	return service
+}
+
+
+func init()  {
+	err := godotenv.Load()
+	if err != nil {
+		logger.Fatal("Error loading .env file")
+	}
 }

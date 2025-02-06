@@ -33,6 +33,7 @@ micro.exe
 micro
 !micro/
 dist/
+consul
 
 *.bak
 

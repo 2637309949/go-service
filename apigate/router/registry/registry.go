@@ -8,13 +8,14 @@ import (
 	"strings"
 	"sync"
 	"time"
-
+	"encoding/json"
 	"apigate/api"
 	"apigate/router"
 	"apigate/util/namespace"
 
 	util "apigate/util/router"
-
+	
+	"go-micro.dev/v5/server"
 	"go-micro.dev/v5/logger"
 	"go-micro.dev/v5/metadata"
 	"go-micro.dev/v5/registry"
@@ -543,6 +544,25 @@ func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// filter httpapi
+	// httpServices := []*registry.Service{}
+	for i := range services {
+		service := services[i]
+		for e := range service.Endpoints {
+			httpEndpoint := server.Decode(e.Metadata)
+			if httpEndpoint != nil && len(httpEndpoint.Path) > 0 {
+				fmt.Println(66, httpEndpoint.Path)
+			}
+		}
+	}
+
+	// 将结构体转换为 JSON 字符串
+	jsonData, _ := json.Marshal(services)
+
+
+	// 输出 JSON 格式的数据
+	fmt.Println(string(jsonData))
 
 	// construct api service
 	return &api.Service{

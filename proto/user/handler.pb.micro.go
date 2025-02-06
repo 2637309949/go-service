@@ -5,6 +5,7 @@ package user
 
 import (
 	fmt "fmt"
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	proto "google.golang.org/protobuf/proto"
 	math "math"
 )
@@ -27,33 +28,41 @@ var _ context.Context
 var _ client.Option
 var _ server.Option
 
-// Api Endpoints for Handler service
+// Api Endpoints for UserService service
 
-func NewHandlerEndpoints() []*registry.Endpoint {
-	return []*registry.Endpoint{}
+func NewUserServiceEndpoints() []*registry.Endpoint {
+	return []*registry.Endpoint{
+		{
+			Name:    "UserService.QueryUserDetail",
+			Path:    "/api/v1/user/QueryUserDetail",
+			Method:  []string{"GET"},
+			Handler: "rpc",
+		},
+	}
 }
 
-// Client API for Handler service
+// Client API for UserService service
 
-type HandlerService interface {
-	Hello(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error)
+type UserService interface {
+	QueryUserDetail(ctx context.Context, in *UserFilter, opts ...client.CallOption) (*User, error)
+	InsertUser(ctx context.Context, in *User, opts ...client.CallOption) (*User, error)
 }
 
-type handlerService struct {
+type userService struct {
 	c    client.Client
 	name string
 }
 
-func NewHandlerService(name string, c client.Client) HandlerService {
-	return &handlerService{
+func NewUserService(name string, c client.Client) UserService {
+	return &userService{
 		c:    c,
 		name: name,
 	}
 }
 
-func (c *handlerService) Hello(ctx context.Context, in *Request, opts ...client.CallOption) (*Response, error) {
-	req := c.c.NewRequest(c.name, "Handler.Hello", in)
-	out := new(Response)
+func (c *userService) QueryUserDetail(ctx context.Context, in *UserFilter, opts ...client.CallOption) (*User, error) {
+	req := c.c.NewRequest(c.name, "UserService.QueryUserDetail", in)
+	out := new(User)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -61,27 +70,49 @@ func (c *handlerService) Hello(ctx context.Context, in *Request, opts ...client.
 	return out, nil
 }
 
-// Server API for Handler service
-
-type HandlerHandler interface {
-	Hello(context.Context, *Request, *Response) error
-}
-
-func RegisterEndpointHandler(s server.Server, hdlr HandlerHandler, opts ...server.HandlerOption) error {
-	type handler interface {
-		Hello(ctx context.Context, in *Request, out *Response) error
+func (c *userService) InsertUser(ctx context.Context, in *User, opts ...client.CallOption) (*User, error) {
+	req := c.c.NewRequest(c.name, "UserService.InsertUser", in)
+	out := new(User)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
 	}
-	type Endpoint struct {
-		handler
+	return out, nil
+}
+
+// Server API for UserService service
+
+type UserServiceHandler interface {
+	QueryUserDetail(context.Context, *UserFilter, *User) error
+	InsertUser(context.Context, *User, *User) error
+}
+
+func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts ...server.HandlerOption) error {
+	type userService interface {
+		QueryUserDetail(ctx context.Context, in *UserFilter, out *User) error
+		InsertUser(ctx context.Context, in *User, out *User) error
 	}
-	h := &handlerHandler{hdlr}
-	return s.Handle(s.NewHandler(&Endpoint{h}, opts...))
+	type UserService struct {
+		userService
+	}
+	h := &userServiceHandler{hdlr}
+	opts = append(opts, server.WithEndpoint(&registry.Endpoint{
+		Name:    "UserService.QueryUserDetail",
+		Path:    "/api/v1/user/QueryUserDetail",
+		Method:  []string{"GET"},
+		Handler: "rpc",
+	}))
+	return s.Handle(s.NewHandler(&UserService{h}, opts...))
 }
 
-type handlerHandler struct {
-	HandlerHandler
+type userServiceHandler struct {
+	UserServiceHandler
 }
 
-func (h *handlerHandler) Hello(ctx context.Context, in *Request, out *Response) error {
-	return h.HandlerHandler.Hello(ctx, in, out)
+func (h *userServiceHandler) QueryUserDetail(ctx context.Context, in *UserFilter, out *User) error {
+	return h.UserServiceHandler.QueryUserDetail(ctx, in, out)
+}
+
+func (h *userServiceHandler) InsertUser(ctx context.Context, in *User, out *User) error {
+	return h.UserServiceHandler.InsertUser(ctx, in, out)
 }

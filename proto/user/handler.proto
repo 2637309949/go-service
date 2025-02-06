@@ -2,8 +2,15 @@ syntax = "proto3";
 
 option go_package = "/;user";
 
+import "google/api/annotations.proto";
 import "proto/user/user.proto";
 
-service Endpoint {
-	rpc Hello(Request) returns (Response) {}
+service UserService {
+	rpc QueryUserDetail(UserFilter) returns (User) {
+		option (google.api.http) = {
+			get: "/api/v1/user/QueryUserDetail"
+			body: "*"
+		};
+	}
+	rpc InsertUser(User) returns (User) {}
 }

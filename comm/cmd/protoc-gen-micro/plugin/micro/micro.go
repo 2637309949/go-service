@@ -249,7 +249,7 @@ func (g *micro) generateService(file *generator.FileDescriptor, service *pb.Serv
 	g.P("h := &", unexport(servName), "Handler{hdlr}")
 	for _, method := range service.Method {
 		if method.Options != nil && proto.HasExtension(method.Options, options.E_Http) {
-			g.P("opts = append(opts, ", apiPkg, ".WithEndpoint(&", apiPkg, ".Endpoint{")
+			g.P("opts = append(opts, ", serverPkg, ".WithEndpoint(&", apiPkg, ".Endpoint{")
 			g.generateEndpoint(servName, method)
 			g.P("}))")
 		}
@@ -302,7 +302,7 @@ func (g *micro) generateEndpoint(servName string, method *pb.MethodDescriptorPro
 	}
 	// TODO: process additional bindings
 	g.P("Name:", fmt.Sprintf(`"%s.%s",`, servName, method.GetName()))
-	g.P("Path:", fmt.Sprintf(`[]string{"%s"},`, path))
+	g.P("Path:", fmt.Sprintf(`"%s",`, path))
 	g.P("Method:", fmt.Sprintf(`[]string{"%s"},`, meth))
 	if method.GetServerStreaming() || method.GetClientStreaming() {
 		g.P("Stream: true,")

@@ -2,7 +2,6 @@ package registry
 
 import (
 	"net/http"
-
 	"go-micro.dev/v5/registry"
 )
 
@@ -13,6 +12,8 @@ import (
 type apiResolver struct{}
 
 func (r *apiResolver) Resolve(req *http.Request) *Endpoint {
+	path := req.URL.Path
+	method := req.Method
 	// get route
 	service, endpoint := apiRoute(req.URL.Path)
 
@@ -26,16 +27,20 @@ func (r *apiResolver) Resolve(req *http.Request) *Endpoint {
 	}
 
 	return &Endpoint{
-		Name:   service,
-		Method: endpoint,
-		Domain: domain,
+		Name:   	service,
+		Method: 	endpoint,
+		Domain: 	domain,
+		Path:   	path,
+		HTTPMethod: method,
 	}
 }
 
 type Endpoint struct {
-	Name   string
-	Method string
-	Domain string
+	Name   		string
+	Method 		string
+	Domain 		string
+	Path   		string   
+	HTTPMethod  string	
 }
 
 func NewResolver() *apiResolver {

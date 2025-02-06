@@ -18,5 +18,7 @@ cd ./comm/cmd/protobuf-go/cmd/protoc-gen-go && go install && cd ../../../../../
 Then start consul
 
 ```
-./consul.exe agent -dev
+wget https://releases.hashicorp.com/consul/1.20.2/consul_1.20.2_linux_amd64.zip
+unzip consul_1.20.2_linux_amd64.zip
+./consul agent -dev -http-port=8400
 ```

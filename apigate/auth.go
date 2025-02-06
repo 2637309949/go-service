@@ -69,7 +69,7 @@ func VerifyNamespace(ns string) VerifyOption {
 	}
 }
 
-func auth() gin.HandlerFunc {
+func Auth() gin.HandlerFunc {
 	resolver := registry.NewResolver()
 	return func(c *gin.Context) {
 		// Determine the name of the service being requested

@@ -10,6 +10,6 @@ func main() {
 	service := service.NewService(
 		service.Name("user"),
 	)
-	pbUser.RegisterEndpointHandler(service.Server(), new(handler.Handler))
+	pbUser.RegisterUserServiceHandler(service.Server(), new(handler.Handler))
 	service.Run()
 }

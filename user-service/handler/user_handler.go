@@ -7,14 +7,18 @@ import (
 	pbUser "proto/user"
 )
 
-func (h *Handler) Hello(ctx context.Context, req *pbUser.Request, rsp *pbUser.Response) error {
+func (h *Handler) QueryUserDetail(ctx context.Context, req *pbUser.UserFilter, rsp *pbUser.User) error {
 	var timemark mark.TimeMark
 	logger := logger.Extract(ctx)
-	defer timemark.Init(ctx, "Hello")()
+	defer timemark.Init(ctx, "QueryUserDetail")()
 
 	logger.Infof("Greeting Hello: %v", req.Name)
 	rsp.Greeting = "Hello " + req.Name
 	timemark.Mark("Greeting")
 
+	return nil
+}
+
+func (h *Handler) InsertUser(ctx context.Context, req *pbUser.User, rsp *pbUser.User) error {
 	return nil
 }
