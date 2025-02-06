@@ -9,6 +9,7 @@ import (
 
 type strippedPrefixKey struct{}
 type prefixKey struct{}
+type filePathKey struct{}
 
 // WithStrippedPrefix sets the environment variable prefixes to scope to.
 // These prefixes will be removed from the actual config entries.
@@ -30,6 +31,17 @@ func WithPrefix(p ...string) source.Option {
 			o.Context = context.Background()
 		}
 		o.Context = context.WithValue(o.Context, prefixKey{}, appendUnderscore(p))
+	}
+}
+
+
+// WithPath sets the path to file.
+func WithPath(p string) source.Option {
+	return func(o *source.Options) {
+		if o.Context == nil {
+			o.Context = context.Background()
+		}
+		o.Context = context.WithValue(o.Context, filePathKey{}, p)
 	}
 }
 
