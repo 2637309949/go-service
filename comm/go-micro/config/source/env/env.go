@@ -1,6 +1,7 @@
 package env
 
 import (
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -18,12 +19,28 @@ type env struct {
 	opts             source.Options
 	prefixes         []string
 	strippedPrefixes []string
+	path             string
 }
 
-func (e *env) Read() (*source.ChangeSet, error) {
-	var changes map[string]interface{}
+var (
+	DefaultPath = ".env"
+)
 
-	for _, env := range os.Environ() {
+func (e *env) Read() (*source.ChangeSet, error) {
+	envs := os.Environ()
+	var changes map[string]interface{}
+	fh, err := os.Open(e.path)
+	if err == nil {
+		defer fh.Close()
+		b, err := io.ReadAll(fh)
+		if err != nil {
+			return nil, err
+		}
+		lines := strings.Split(string(b), "\n")
+		envs = append(envs, lines...)
+	}
+
+	for _, env := range envs {
 		if len(e.prefixes) > 0 || len(e.strippedPrefixes) > 0 {
 			notFound := true
 
@@ -142,5 +159,11 @@ func NewSource(opts ...source.Option) source.Source {
 	if len(sp) > 0 || len(pre) > 0 {
 		pre = append(pre, DefaultPrefixes...)
 	}
-	return &env{prefixes: pre, strippedPrefixes: sp, opts: options}
+
+	path := DefaultPath
+	f, ok := options.Context.Value(filePathKey{}).(string)
+	if ok {
+		path = f
+	}
+	return &env{prefixes: pre, strippedPrefixes: sp, opts: options, path: path}
 }

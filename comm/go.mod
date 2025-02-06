@@ -3,12 +3,14 @@ module comm
 go 1.22.0
 
 replace (
+	github.com/micro/plugins/v5/source/consul => ../comm/plugins/source/consul
 	github.com/micro/plugins/v5/registry/consul => ../comm/plugins/registry/consul
 	github.com/micro/plugins/v5/wrapper/trace/opentracing => ../comm/plugins/wrapper/trace/opentracing
 	go-micro.dev/v5 => ../comm/go-micro
 )
 
 require (
+	github.com/micro/plugins/v5/source/consul v0.0.0-00010101000000-000000000000
 	github.com/micro/plugins/v5/registry/consul v0.0.0-00010101000000-000000000000
 	github.com/micro/plugins/v5/wrapper/trace/opentracing v0.0.0-00010101000000-000000000000
 	github.com/urfave/cli/v2 v2.25.7
@@ -55,7 +57,6 @@ require (
 )
 
 require (
-	github.com/joho/godotenv v1.5.1
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 )
