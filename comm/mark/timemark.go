@@ -20,6 +20,7 @@ func (t *TimeMark) Mark(format string, data ...interface{}) {
 }
 
 func (t *TimeMark) Init(ctx context.Context, format string, data ...interface{}) func() {
+	logger := logger.Extract(ctx)
 	t.start = time.Now()
 	t.last = time.Now()
 	return func() {

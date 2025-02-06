@@ -22,3 +22,24 @@ wget https://releases.hashicorp.com/consul/1.20.2/consul_1.20.2_linux_amd64.zip
 unzip consul_1.20.2_linux_amd64.zip
 ./consul agent -dev -http-port=8400
 ```
+
+## Expose http
+
+```proto
+syntax = "proto3";
+
+option go_package = "/;user";
+
+import "google/api/annotations.proto";
+import "proto/user/user.proto";
+
+service UserService {
+	rpc QueryUserDetail(UserFilter) returns (User) {
+		option (google.api.http) = {
+			get: "/api/v1/user/QueryUserDetail" // expose httpApi
+			body: "*"
+		};
+	}
+	rpc InsertUser(User) returns (User) {} // only rpc
+}
+```
