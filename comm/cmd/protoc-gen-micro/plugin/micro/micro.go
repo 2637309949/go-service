@@ -301,6 +301,7 @@ func (g *micro) generateEndpoint(servName string, method *pb.MethodDescriptorPro
 		return
 	}
 	// TODO: process additional bindings
+	g.P("Authorization:", fmt.Sprintf(`%t,`, rule.GetAuthorization()))
 	g.P("Name:", fmt.Sprintf(`"%s.%s",`, servName, method.GetName()))
 	g.P("Path:", fmt.Sprintf(`"%s",`, path))
 	g.P("Method:", fmt.Sprintf(`[]string{"%s"},`, meth))
