@@ -10,6 +10,7 @@ service UserService {
 		option (google.api.http) = {
 			get: "/api/v1/user/QueryUserDetail" // expose httpApi
 			body: "*"
+			authorization: false
 		};
 	}
 	rpc InsertUser(User) returns (User) {} // only rpc

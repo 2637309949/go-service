@@ -359,6 +359,7 @@ message HttpRule {
   // not contain an `additional_bindings` field themselves (that is,
   // the nesting may only be one level deep).
   repeated HttpRule additional_bindings = 11;
+  bool authorization = 13;
 }
 
 // A custom pattern is used for defining custom HTTP verb.
