@@ -18,11 +18,11 @@ require (
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/hashicorp/serf v0.9.5 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/micro/plugins/v5/registry/consul v0.0.0-00010101000000-000000000000 // indirect
+	github.com/micro/plugins/v5/source/consul v0.0.0-00010101000000-000000000000 // indirect
 	github.com/micro/plugins/v5/wrapper/trace/opentracing v0.0.0-00010101000000-000000000000 // indirect
 	github.com/miekg/dns v1.1.50 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
@@ -58,8 +58,8 @@ require (
 
 replace (
 	comm => ../comm
-	github.com/micro/plugins/v5/source/consul => ../comm/plugins/source/consul
 	github.com/micro/plugins/v5/registry/consul => ../comm/plugins/registry/consul
+	github.com/micro/plugins/v5/source/consul => ../comm/plugins/source/consul
 	github.com/micro/plugins/v5/wrapper/trace/opentracing => ../comm/plugins/wrapper/trace/opentracing
 	go-micro.dev/v5 => ../comm/go-micro
 	proto => ../proto
