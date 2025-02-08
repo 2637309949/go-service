@@ -34,9 +34,16 @@ func NewUserServiceEndpoints() []*registry.Endpoint {
 	return []*registry.Endpoint{
 		{
 			Authorization: false,
+			Name:          "UserService.QueryUser",
+			Path:          "/QueryUser",
+			Method:        []string{"GET"},
+			Handler:       "rpc",
+		},
+		{
+			Authorization: false,
 			Name:          "UserService.QueryUserDetail",
 			Path:          "/QueryUserDetail",
-			Method:        "GET",
+			Method:        []string{"GET"},
 			Handler:       "rpc",
 		},
 	}
@@ -45,8 +52,11 @@ func NewUserServiceEndpoints() []*registry.Endpoint {
 // Client API for UserService service
 
 type UserService interface {
+	QueryUser(ctx context.Context, in *UserFilter, opts ...client.CallOption) (*UserList, error)
 	QueryUserDetail(ctx context.Context, in *UserFilter, opts ...client.CallOption) (*User, error)
 	InsertUser(ctx context.Context, in *User, opts ...client.CallOption) (*User, error)
+	UpdateUser(ctx context.Context, in *User, opts ...client.CallOption) (*User, error)
+	DeleteUser(ctx context.Context, in *User, opts ...client.CallOption) (*User, error)
 }
 
 type userService struct {
@@ -59,6 +69,16 @@ func NewUserService(name string, c client.Client) UserService {
 		c:    c,
 		name: name,
 	}
+}
+
+func (c *userService) QueryUser(ctx context.Context, in *UserFilter, opts ...client.CallOption) (*UserList, error) {
+	req := c.c.NewRequest(c.name, "UserService.QueryUser", in)
+	out := new(UserList)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *userService) QueryUserDetail(ctx context.Context, in *UserFilter, opts ...client.CallOption) (*User, error) {
@@ -81,17 +101,43 @@ func (c *userService) InsertUser(ctx context.Context, in *User, opts ...client.C
 	return out, nil
 }
 
+func (c *userService) UpdateUser(ctx context.Context, in *User, opts ...client.CallOption) (*User, error) {
+	req := c.c.NewRequest(c.name, "UserService.UpdateUser", in)
+	out := new(User)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) DeleteUser(ctx context.Context, in *User, opts ...client.CallOption) (*User, error) {
+	req := c.c.NewRequest(c.name, "UserService.DeleteUser", in)
+	out := new(User)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for UserService service
 
 type UserServiceHandler interface {
+	QueryUser(context.Context, *UserFilter, *UserList) error
 	QueryUserDetail(context.Context, *UserFilter, *User) error
 	InsertUser(context.Context, *User, *User) error
+	UpdateUser(context.Context, *User, *User) error
+	DeleteUser(context.Context, *User, *User) error
 }
 
 func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts ...server.HandlerOption) error {
 	type userService interface {
+		QueryUser(ctx context.Context, in *UserFilter, out *UserList) error
 		QueryUserDetail(ctx context.Context, in *UserFilter, out *User) error
 		InsertUser(ctx context.Context, in *User, out *User) error
+		UpdateUser(ctx context.Context, in *User, out *User) error
+		DeleteUser(ctx context.Context, in *User, out *User) error
 	}
 	type UserService struct {
 		userService
@@ -99,9 +145,16 @@ func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts .
 	h := &userServiceHandler{hdlr}
 	opts = append(opts, server.WithEndpoint(&registry.Endpoint{
 		Authorization: false,
+		Name:          "UserService.QueryUser",
+		Path:          "/QueryUser",
+		Method:        []string{"GET"},
+		Handler:       "rpc",
+	}))
+	opts = append(opts, server.WithEndpoint(&registry.Endpoint{
+		Authorization: false,
 		Name:          "UserService.QueryUserDetail",
 		Path:          "/QueryUserDetail",
-		Method:        "GET",
+		Method:        []string{"GET"},
 		Handler:       "rpc",
 	}))
 	return s.Handle(s.NewHandler(&UserService{h}, opts...))
@@ -111,10 +164,22 @@ type userServiceHandler struct {
 	UserServiceHandler
 }
 
+func (h *userServiceHandler) QueryUser(ctx context.Context, in *UserFilter, out *UserList) error {
+	return h.UserServiceHandler.QueryUser(ctx, in, out)
+}
+
 func (h *userServiceHandler) QueryUserDetail(ctx context.Context, in *UserFilter, out *User) error {
 	return h.UserServiceHandler.QueryUserDetail(ctx, in, out)
 }
 
 func (h *userServiceHandler) InsertUser(ctx context.Context, in *User, out *User) error {
 	return h.UserServiceHandler.InsertUser(ctx, in, out)
+}
+
+func (h *userServiceHandler) UpdateUser(ctx context.Context, in *User, out *User) error {
+	return h.UserServiceHandler.UpdateUser(ctx, in, out)
+}
+
+func (h *userServiceHandler) DeleteUser(ctx context.Context, in *User, out *User) error {
+	return h.UserServiceHandler.DeleteUser(ctx, in, out)
 }
