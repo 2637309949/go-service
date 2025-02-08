@@ -19,6 +19,18 @@ func (h *Handler) QueryUserDetail(ctx context.Context, req *pbUser.UserFilter, r
 	return nil
 }
 
+func (h *Handler) QueryUser(ctx context.Context, req *pbUser.User, rsp *pbUser.UserList) error {
+	return nil
+}
+
 func (h *Handler) InsertUser(ctx context.Context, req *pbUser.User, rsp *pbUser.User) error {
+	return nil
+}
+
+func (h *Handler) UpdateUser(ctx context.Context, req *pbUser.User, rsp *pbUser.User) error {
+	return nil
+}
+
+func (h *Handler) DeleteUser(ctx context.Context, req *pbUser.User, rsp *pbUser.User) error {
 	return nil
 }

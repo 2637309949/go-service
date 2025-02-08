@@ -19,6 +19,7 @@ import (
 
 func main() {
 	logger.Info("Starting server")
+	apiBase := "/api"
 	consulAddress := config.Get("consul").String("")
 	consulRegistry := consul.NewRegistry(func(op *regi.Options) {
 		op.Addrs = []string{
@@ -28,7 +29,7 @@ func main() {
 	opts := []handler.Option{
 		handler.WithClient(client.DefaultClient),
 		handler.WithRouter(registry.NewRouter(
-			router.WithApiBase("/api"),
+			router.WithApiBase(apiBase),
 			router.WithRegistry(consulRegistry),
 		)),
 	}
@@ -47,7 +48,7 @@ func main() {
 		})
 	})
 	r.GET("/favicon.ico", func(c *gin.Context) {})
-	r.Use(auth("/api"))
+	r.Use(auth(apiBase))
 	r.NoRoute(func(c *gin.Context) {
 		hd.ServeHTTP(c.Writer, c.Request)
 	})
@@ -56,9 +57,7 @@ func main() {
 }
 
 func init() {
-	err := config.Load(env.NewSource(
-		env.WithPath("./.env"),
-	))
+	err := config.Load(env.NewSource())
 	if err != nil {
 		logger.Fatalf("Error source load: %v", err)
 	}

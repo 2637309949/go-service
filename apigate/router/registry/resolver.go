@@ -24,25 +24,23 @@ func (r *apiResolver) Resolve(req *http.Request) *Endpoint {
 	// by the auth wrapper if an auth token was provided. The headr takes priority over any domain
 	// passed as a default
 	domain := registry.DefaultDomain
-
 	if dom := req.Header.Get("Micro-Namespace"); len(dom) > 0 {
 		domain = dom
 	}
 
 	return &Endpoint{
-		Name:       service,
-		Domain:     domain,
-		Path:       endpoint,
-		HTTPMethod: method,
+		Name:   service,
+		Domain: domain,
+		Path:   endpoint,
+		Method: method,
 	}
 }
 
 type Endpoint struct {
-	Name       string
-	Method     string
-	Domain     string
-	Path       string
-	HTTPMethod string
+	Name   string
+	Method string
+	Domain string
+	Path   string
 }
 
 func NewResolver(apiBase string) *apiResolver {

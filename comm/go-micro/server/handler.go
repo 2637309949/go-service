@@ -2,7 +2,7 @@ package server
 
 import (
 	"context"
-	"strings"
+
 	"go-micro.dev/v5/registry"
 )
 
@@ -24,7 +24,6 @@ type SubscriberOptions struct {
 	Internal bool
 }
 
-
 // Encode encodes an endpoint to endpoint metadata
 func Encode(e *registry.Endpoint) map[string]string {
 	if e == nil {
@@ -44,7 +43,7 @@ func Encode(e *registry.Endpoint) map[string]string {
 
 	set("endpoint", e.Name)
 	set("handler", e.Handler)
-	set("method", strings.Join(e.Method, ","))
+	set("method", e.Method)
 	set("path", e.Path)
 
 	return ep
@@ -57,23 +56,11 @@ func Decode(e map[string]string) *registry.Endpoint {
 	}
 
 	return &registry.Endpoint{
-		Name:        e["endpoint"],
-		Method:      slice(e["method"]),
-		Path:        e["path"],
-		Handler:     e["handler"],
+		Name:    e["endpoint"],
+		Method:  e["method"],
+		Path:    e["path"],
+		Handler: e["handler"],
 	}
-}
-
-func slice(s string) []string {
-	var sl []string
-
-	for _, p := range strings.Split(s, ",") {
-		if str := strings.TrimSpace(p); len(str) > 0 {
-			sl = append(sl, strings.TrimSpace(p))
-		}
-	}
-
-	return sl
 }
 
 func WithEndpoint(e *registry.Endpoint) HandlerOption {

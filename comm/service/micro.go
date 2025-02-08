@@ -36,16 +36,16 @@ func NewService(opts ...micro.Option) micro.Service {
 			registryAddress,
 		}
 	})
-	opts = append(opts, micro.WrapClient(wrapClient))
 	opts = append(opts, micro.Registry(registry))
 	opts = append(opts, micro.WrapClient(opentracing.NewClientWrapper(nil)))
 	opts = append(opts, micro.WrapHandler(opentracing.NewHandlerWrapper(nil)))
 	opts = append(opts, micro.WrapSubscriber(opentracing.NewSubscriberWrapper(nil)))
-	opts = append(opts, micro.WrapHandler(loggerWrapper(logger.DefaultLogger)))
 	opts = append(opts, micro.RegisterTTL(time.Second*90))
 	opts = append(opts, micro.RegisterInterval(time.Second*30))
 	opts = append(opts, micro.Version("latest"))
 	opts = append(opts, micro.Context(ctx))
+	opts = append(opts, micro.WrapHandler(loggerWrapper(logger.DefaultLogger)))
+	opts = append(opts, micro.WrapHandler(loggerHandler))
 	service := &service{micro.NewService(
 		opts...,
 	)}

@@ -6,6 +6,13 @@ import "google/api/annotations.proto";
 import "proto/user/user.proto";
 
 service UserService {
+	rpc QueryUser (UserFilter) returns (UserList) {
+		option (google.api.http) = {
+			get: "/QueryUser" // expose httpApi
+			authorization: false
+			body: "*"
+		};
+	}
 	rpc QueryUserDetail(UserFilter) returns (User) {
 		option (google.api.http) = {
 			get: "/QueryUserDetail" // expose httpApi
@@ -13,5 +20,7 @@ service UserService {
 			body: "*"
 		};
 	}
-	rpc InsertUser(User) returns (User) {} // only rpc
+	rpc InsertUser(User) returns (User) {}
+    rpc UpdateUser (User) returns (User) {}
+	rpc DeleteUser (User) returns (User) {}
 }

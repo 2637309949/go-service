@@ -3,9 +3,16 @@ syntax = "proto3";
 option go_package = "/;user";
 
 message UserFilter {
-	string name = 1;
+	string name = 1 [json_name = "name"];
 }
 
 message User {
-	string greeting = 2;
+	string greeting = 1 [json_name = "greeting"];
+}
+
+message UserList {
+	int32 cur_page = 1 [json_name = "cur_page"];
+	int32 total_page = 2 [json_name = "total_page"];
+	int32 total_count = 3 [json_name = "total_count"];
+    repeated User data = 4 [json_name = "data"];
 }
