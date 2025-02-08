@@ -31,6 +31,11 @@ func ConfSlice(path ...string) []string {
 	return StringSlice(lst...)
 }
 
+func ConfBytes(path ...string) []byte {
+	lst := append([]string{"micro", "config", "service", serviceName()}, path...)
+	return Bytes(lst...)
+}
+
 func CommConf(path ...string) string {
 	lst := append([]string{"micro", "config", "comm"}, path...)
 	return String(lst...)

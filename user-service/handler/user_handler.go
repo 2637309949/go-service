@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"comm/db"
 	"comm/logger"
 	"comm/mark"
 	"context"
@@ -12,6 +13,15 @@ func (h *Handler) QueryUserDetail(ctx context.Context, req *pbUser.UserFilter, r
 	logger := logger.Extract(ctx)
 	defer timemark.Init(ctx, "QueryUserDetail")()
 
+	session, _ := db.InitDb(ctx)
+	timemark.Mark("InitDb")
+	type Result struct {
+		Sum int `gorm:"column:sum"`
+	}
+	var result Result
+	session.Raw("SELECT 1 + 1 as sum").Scan(&result)
+	logger.Info(result.Sum) // 输出 2
+
 	logger.Infof("Greeting Hello: %v", req.Name)
 	rsp.Greeting = "Hello " + req.Name
 	timemark.Mark("Greeting")
@@ -19,7 +29,7 @@ func (h *Handler) QueryUserDetail(ctx context.Context, req *pbUser.UserFilter, r
 	return nil
 }
 
-func (h *Handler) QueryUser(ctx context.Context, req *pbUser.User, rsp *pbUser.UserList) error {
+func (h *Handler) QueryUser(ctx context.Context, req *pbUser.UserFilter, rsp *pbUser.UserList) error {
 	return nil
 }
 

@@ -38,6 +38,17 @@ func (h *Helper) Logf(level logger.Level, template string, args ...interface{}) 
 	h.logger.Logf(level, template, args...)
 }
 
+func (h *Helper) Print(args ...interface{}) {
+	l := h.logger
+	args = DBFormatter(args...)
+	if len(args) > 0 {
+		first := args[0]
+		l = l.Fields(map[string]interface{}{"file": first})
+		args = args[1:]
+	}
+	l.Log(logger.InfoLevel, args...)
+}
+
 func (h *Helper) Info(args ...interface{}) {
 	if !h.logger.Options().Level.Enabled(logger.InfoLevel) {
 		return

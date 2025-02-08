@@ -8,14 +8,14 @@ import (
 )
 
 type Validator interface {
-	Validate() error
+	Validate(context.Context) error
 }
 
 func NewHandlerWrapper() server.HandlerWrapper {
 	return func(fn server.HandlerFunc) server.HandlerFunc {
 		return func(ctx context.Context, req server.Request, rsp interface{}) error {
 			if v, ok := req.Body().(Validator); ok {
-				if err := v.Validate(); err != nil {
+				if err := v.Validate(ctx); err != nil {
 					return errors.BadRequest(req.Service(), "%v", err)
 				}
 			}

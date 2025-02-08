@@ -36,14 +36,14 @@ func NewUserServiceEndpoints() []*registry.Endpoint {
 			Authorization: false,
 			Name:          "UserService.QueryUser",
 			Path:          "/QueryUser",
-			Method:        []string{"GET"},
+			Method:        "GET",
 			Handler:       "rpc",
 		},
 		{
 			Authorization: false,
 			Name:          "UserService.QueryUserDetail",
 			Path:          "/QueryUserDetail",
-			Method:        []string{"GET"},
+			Method:        "GET",
 			Handler:       "rpc",
 		},
 	}
@@ -147,14 +147,14 @@ func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts .
 		Authorization: false,
 		Name:          "UserService.QueryUser",
 		Path:          "/QueryUser",
-		Method:        []string{"GET"},
+		Method:        "GET",
 		Handler:       "rpc",
 	}))
 	opts = append(opts, server.WithEndpoint(&registry.Endpoint{
 		Authorization: false,
 		Name:          "UserService.QueryUserDetail",
 		Path:          "/QueryUserDetail",
-		Method:        []string{"GET"},
+		Method:        "GET",
 		Handler:       "rpc",
 	}))
 	return s.Handle(s.NewHandler(&UserService{h}, opts...))

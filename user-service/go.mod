@@ -7,7 +7,9 @@ require (
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/fatih/color v1.16.0 // indirect
+	github.com/forgoer/openssl v1.6.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
+	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/consul/api v1.31.0 // indirect
@@ -20,7 +22,10 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/serf v0.10.1 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
+	github.com/jinzhu/gorm v1.9.16 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
+	github.com/lib/pq v1.1.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/micro/plugins/v5/registry/consul v0.0.0-00010101000000-000000000000 // indirect
@@ -63,6 +68,7 @@ replace (
 	comm => ../comm
 	github.com/micro/plugins/v5/registry/consul => ../comm/plugins/registry/consul
 	github.com/micro/plugins/v5/source/consul => ../comm/plugins/source/consul
+    github.com/micro/plugins/v5/wrapper/validator => ../comm/plugins/wrapper/validator
 	github.com/micro/plugins/v5/wrapper/trace/opentracing => ../comm/plugins/wrapper/trace/opentracing
 	go-micro.dev/v5 => ../comm/go-micro
 	proto => ../proto

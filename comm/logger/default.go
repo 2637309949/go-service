@@ -111,8 +111,10 @@ func (l *defaultLogger) Log(level logger.Level, v ...interface{}) {
 
 	fields["level"] = level.String()
 
-	if _, file, line, ok := runtime.Caller(l.opts.CallerSkipCount); ok {
-		fields["file"] = fmt.Sprintf("%s:%d", logCallerfilePath(file), line)
+	if _, ok := fields["file"]; !ok {
+		if _, file, line, ok := runtime.Caller(l.opts.CallerSkipCount); ok {
+			fields["file"] = fmt.Sprintf("%s:%d", logCallerfilePath(file), line)
+		}
 	}
 
 	rec := dlog.Record{

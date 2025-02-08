@@ -1,17 +1,28 @@
 package service
 
 import (
+	"comm/db"
 	"comm/logger"
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"time"
 
 	"comm/config"
 
+	"github.com/forgoer/openssl"
 	"github.com/micro/plugins/v5/registry/consul"
 	"github.com/micro/plugins/v5/wrapper/trace/opentracing"
+	"github.com/micro/plugins/v5/wrapper/validator"
 	"go-micro.dev/v5"
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/server"
+)
+
+var (
+	dbdriver       = "mysql"
+	ServiceName    string
+	defaultService micro.Service
 )
 
 type service struct {
@@ -37,6 +48,7 @@ func NewService(opts ...micro.Option) micro.Service {
 		}
 	})
 	opts = append(opts, micro.Registry(registry))
+	opts = append(opts, micro.WrapHandler(validator.NewHandlerWrapper()))
 	opts = append(opts, micro.WrapClient(opentracing.NewClientWrapper(nil)))
 	opts = append(opts, micro.WrapHandler(opentracing.NewHandlerWrapper(nil)))
 	opts = append(opts, micro.WrapSubscriber(opentracing.NewSubscriberWrapper(nil)))
@@ -53,8 +65,24 @@ func NewService(opts ...micro.Option) micro.Service {
 	service.Server().Init(
 		server.Wait(nil),
 	)
-	initJaegerTracer(service.Name(), opentracingAddress)
+	defaultService = service
+	ServiceName = service.Name()
 
+	// init tracer
+	initJaegerTracer(service.Name(), opentracingAddress)
+	// init conf
 	setupService(service)
+	// init db
+	var dbOpts []db.Options
+	json.Unmarshal(config.ConfBytes("db"), &dbOpts)
+	key := []byte("Uu9sbdsduYUSudhs18dh/w==")
+	for i, opt := range dbOpts {
+		tmp, _ := base64.StdEncoding.DecodeString(opt.Passwd)
+		var temp []byte
+		temp, _ = openssl.Des3ECBDecrypt(tmp, key, openssl.PKCS5_PADDING)
+		dbOpts[i].Passwd = string(temp)
+	}
+	db.SetConns(dbdriver, dbOpts)
+
 	return service
 }

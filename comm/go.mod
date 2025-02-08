@@ -6,6 +6,7 @@ replace (
 	github.com/micro/plugins/v5/registry/consul => ../comm/plugins/registry/consul
 	github.com/micro/plugins/v5/source/consul => ../comm/plugins/source/consul
 	github.com/micro/plugins/v5/wrapper/trace/opentracing => ../comm/plugins/wrapper/trace/opentracing
+	github.com/micro/plugins/v5/wrapper/validator => ../comm/plugins/wrapper/validator
 	go-micro.dev/v5 => ../comm/go-micro
 )
 
@@ -13,6 +14,7 @@ require (
 	github.com/micro/plugins/v5/registry/consul v0.0.0-00010101000000-000000000000
 	github.com/micro/plugins/v5/source/consul v0.0.0-00010101000000-000000000000
 	github.com/micro/plugins/v5/wrapper/trace/opentracing v0.0.0-00010101000000-000000000000
+	github.com/micro/plugins/v5/wrapper/validator v0.0.0-00010101000000-000000000000
 	github.com/urfave/cli/v2 v2.25.7
 	go-micro.dev/v5 v5.2.0
 )
@@ -36,6 +38,8 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/serf v0.10.1 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/lib/pq v1.1.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/miekg/dns v1.1.50 // indirect
@@ -60,6 +64,9 @@ require (
 )
 
 require (
+	github.com/forgoer/openssl v1.6.0
+	github.com/go-sql-driver/mysql v1.5.0
+	github.com/jinzhu/gorm v1.9.16
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 )
