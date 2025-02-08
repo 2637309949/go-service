@@ -3,10 +3,12 @@ package consul
 import (
 	"fmt"
 	"net"
+	"os"
 	"sync"
 
 	"github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/api/watch"
+	"github.com/hashicorp/go-hclog"
 	"go-micro.dev/v5/registry"
 	regutil "go-micro.dev/v5/util/registry"
 )
@@ -16,9 +18,8 @@ type consulWatcher struct {
 	wo       registry.WatchOptions
 	wp       *watch.Plan
 	watchers map[string]*watch.Plan
-
-	next chan *registry.Result
-	exit chan bool
+	next     chan *registry.Result
+	exit     chan bool
 
 	sync.RWMutex
 	services map[string][]*registry.Service
@@ -38,22 +39,19 @@ func newConsulWatcher(cr *consulRegistry, opts ...registry.WatchOption) (registr
 		watchers: make(map[string]*watch.Plan),
 		services: make(map[string][]*registry.Service),
 	}
-	wpArgs := map[string]interface{}{
-		"type": "services",
-	}
-	// watch only one
-	if len(wo.Service) > 0 {
-		wpArgs["service"] = wo.Service
-		wpArgs["type"] = "service"
-	}
+	wpArgs := map[string]interface{}{"type": "services"}
 	wp, err := watch.Parse(wpArgs)
-
 	if err != nil {
 		return nil, err
 	}
 
-	wp.Handler = cw.serviceHandler
-	go wp.RunWithClientAndHclog(cr.Client(), wp.Logger)
+	// watch services for new add
+	wp.Handler = cw.handle
+	go wp.RunWithClientAndHclog(cr.Client(), hclog.New(&hclog.LoggerOptions{
+		Name:   "consul-watch",
+		Level:  hclog.Trace,
+		Output: os.Stdout,
+	}))
 	cw.wp = wp
 
 	return cw, nil
@@ -189,14 +187,14 @@ func (cw *consulWatcher) serviceHandler(idx uint64, data interface{}) {
 		}
 	}
 
-	// there are no services in the service, empty all services
-	if len(rservices) != 0 && serviceName == "" {
-		for _, services := range rservices {
-			for _, service := range services {
-				cw.next <- &registry.Result{Action: "delete", Service: service}
-			}
-		}
-	}
+	// // there are no services in the service, empty all services
+	// if len(rservices) != 0 && serviceName == "" {
+	// 	for _, services := range rservices {
+	// 		for _, service := range services {
+	// 			cw.next <- &registry.Result{Action: "delete", Service: service}
+	// 		}
+	// 	}
+	// }
 
 	cw.Lock()
 	cw.services[serviceName] = newServices

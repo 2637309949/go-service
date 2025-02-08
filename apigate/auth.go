@@ -63,14 +63,15 @@ func VerifyContext(ctx context.Context) VerifyOption {
 		o.Context = ctx
 	}
 }
+
 func VerifyNamespace(ns string) VerifyOption {
 	return func(o *VerifyOptions) {
 		o.Namespace = ns
 	}
 }
 
-func Auth() gin.HandlerFunc {
-	resolver := registry.NewResolver()
+func auth(apiBase string) gin.HandlerFunc {
+	resolver := registry.NewResolver(apiBase)
 	return func(c *gin.Context) {
 		// Determine the name of the service being requested
 		req := c.Request

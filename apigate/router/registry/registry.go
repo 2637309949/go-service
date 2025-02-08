@@ -1,24 +1,25 @@
 package registry
 
 import (
+	"apigate/api"
+	"apigate/router"
+	"apigate/util/namespace"
 	"errors"
 	"fmt"
 	"net/http"
+	"path"
 	"regexp"
 	"strings"
 	"sync"
 	"time"
-	"apigate/api"
-	"apigate/router"
-	"apigate/util/namespace"
 
 	util "apigate/util/router"
-	
-	"go-micro.dev/v5/server"
+
 	"go-micro.dev/v5/logger"
 	"go-micro.dev/v5/metadata"
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/registry/cache"
+	"go-micro.dev/v5/server"
 )
 
 var (
@@ -137,7 +138,7 @@ func (r *registryRouter) refresh() {
 		namespaces := r.namespaces
 		r.RUnlock()
 
-		for ns, _ := range namespaces {
+		for ns := range namespaces {
 			err := r.refreshNamespace(ns)
 			if err == errEmptyNamespace {
 				r.Lock()
@@ -168,7 +169,6 @@ func (r *registryRouter) process(res *registry.Result) {
 	if res == nil || res.Service == nil {
 		return
 	}
-
 	// get entry from cache
 	// only deals with default namespace
 	service, err := r.rc.GetService(res.Service.Name)
@@ -203,7 +203,6 @@ func (r *registryRouter) store(namespace string, services []*registry.Service) {
 	for _, service := range services {
 		// set names we need later
 		names[service.Name] = true
-
 		// map per endpoint
 		for _, sep := range service.Endpoints {
 			// create a key service:endpoint_name
@@ -325,7 +324,6 @@ func (r *registryRouter) watch() {
 		if r.isClosed() {
 			return
 		}
-
 		// watch for changes
 		w, err := r.opts.Registry.Watch(registry.WatchDomain(registry.WildcardDomain))
 		if err != nil {
@@ -423,6 +421,7 @@ endpointLoop:
 			continue
 		}
 		ep := e.Endpoint
+		fmt.Printf("ep=%+v", ep)
 		var mMatch, hMatch bool
 		// 1. try method
 		for _, m := range ep.Method {
@@ -517,23 +516,12 @@ func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
 		return nil, errors.New("router closed")
 	}
 
-	// try get an endpoint from cache
-	ep, err := r.Endpoint(req)
-	if err == nil {
-		return ep, nil
-	}
-
-	// error not nil
-	// ignore that shit
-	// TODO: don't ignore that shit
-
 	// get the service name
 	rp := r.resolver.Resolve(req)
 	// service name
 	name := rp.Name
-	path := rp.Path
-	method := rp.Method
-
+	reqPath := rp.Path
+	method := rp.HTTPMethod
 	// trigger an endpoint refresh
 	select {
 	case r.refreshChan <- rp.Domain:
@@ -555,9 +543,9 @@ func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
 			endpoint := service.Endpoints[j]
 			httpEndpoint := server.Decode(endpoint.Metadata)
 			if httpEndpoint != nil && len(httpEndpoint.Path) > 0 {
-				fmt.Println(66, httpEndpoint.Path)
+				edpPath := path.Clean(httpEndpoint.Path)
 				// todo dynamic matching
-				if httpEndpoint.Path == path && contains(httpEndpoint.Method, method) {
+				if edpPath == reqPath && contains(httpEndpoint.Method, method) {
 					httpServices = append(httpServices, service)
 					if len(endpointName) == 0 {
 						endpointName = httpEndpoint.Name
@@ -567,7 +555,7 @@ func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
 		}
 	}
 	if len(httpServices) == 0 || len(endpointName) == 0 {
-		return nil,errors.New("rpc: can't find service Endpoint")
+		return nil, errors.New("rpc: can't find service Endpoint")
 	}
 
 	// construct api service
@@ -597,15 +585,15 @@ func newRouter(opts ...router.Option) *registryRouter {
 		refreshChan: make(chan string),
 		opts:        options,
 		rc:          cache.New(options.Registry),
-		resolver:    new(apiResolver),
+		resolver:    NewResolver(options.ApiBase),
 		namespaces: map[string]*namespaceEntry{
-			namespace.DefaultNamespace: &namespaceEntry{
+			namespace.DefaultNamespace: {
 				eps:  make(map[string]*api.Service),
 				ceps: make(map[string]*endpoint),
 			}},
 	}
-	go r.watch()
-	go r.refresh()
+	// go r.watch()
+	// go r.refresh()
 	return r
 }
 

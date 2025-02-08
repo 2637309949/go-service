@@ -35,7 +35,7 @@ func NewUserServiceEndpoints() []*registry.Endpoint {
 		{
 			Authorization: false,
 			Name:          "UserService.QueryUserDetail",
-			Path:          "/api/v1/user/QueryUserDetail",
+			Path:          "/QueryUserDetail",
 			Method:        []string{"GET"},
 			Handler:       "rpc",
 		},
@@ -100,7 +100,7 @@ func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts .
 	opts = append(opts, server.WithEndpoint(&registry.Endpoint{
 		Authorization: false,
 		Name:          "UserService.QueryUserDetail",
-		Path:          "/api/v1/user/QueryUserDetail",
+		Path:          "/QueryUserDetail",
 		Method:        []string{"GET"},
 		Handler:       "rpc",
 	}))

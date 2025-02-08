@@ -2,6 +2,8 @@ package service
 
 import (
 	"comm/logger"
+	"context"
+	"time"
 
 	"comm/config"
 
@@ -9,6 +11,7 @@ import (
 	"github.com/micro/plugins/v5/wrapper/trace/opentracing"
 	"go-micro.dev/v5"
 	"go-micro.dev/v5/registry"
+	"go-micro.dev/v5/server"
 )
 
 type service struct {
@@ -25,6 +28,7 @@ func (s *service) Run() error {
 
 // NewService creates and returns a new Service based on the packages within.
 func NewService(opts ...micro.Option) micro.Service {
+	ctx := context.Background()
 	registryAddress := config.CommConf("registry_address")
 	opentracingAddress := config.CommConf("opentracing_address")
 	registry := consul.NewRegistry(func(op *registry.Options) {
@@ -32,15 +36,23 @@ func NewService(opts ...micro.Option) micro.Service {
 			registryAddress,
 		}
 	})
+	opts = append(opts, micro.WrapClient(wrapClient))
 	opts = append(opts, micro.Registry(registry))
 	opts = append(opts, micro.WrapClient(opentracing.NewClientWrapper(nil)))
 	opts = append(opts, micro.WrapHandler(opentracing.NewHandlerWrapper(nil)))
 	opts = append(opts, micro.WrapSubscriber(opentracing.NewSubscriberWrapper(nil)))
-	opts = append(opts, micro.WrapHandler(LoggerWrapper(logger.DefaultLogger)))
+	opts = append(opts, micro.WrapHandler(loggerWrapper(logger.DefaultLogger)))
+	opts = append(opts, micro.RegisterTTL(time.Second*90))
+	opts = append(opts, micro.RegisterInterval(time.Second*30))
+	opts = append(opts, micro.Version("latest"))
+	opts = append(opts, micro.Context(ctx))
 	service := &service{micro.NewService(
 		opts...,
 	)}
 	service.Init()
+	service.Server().Init(
+		server.Wait(nil),
+	)
 	initJaegerTracer(service.Name(), opentracingAddress)
 
 	setupService(service)

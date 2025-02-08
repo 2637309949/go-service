@@ -8,9 +8,9 @@ import "proto/user/user.proto";
 service UserService {
 	rpc QueryUserDetail(UserFilter) returns (User) {
 		option (google.api.http) = {
-			get: "/api/v1/user/QueryUserDetail" // expose httpApi
-			body: "*"
+			get: "/QueryUserDetail" // expose httpApi
 			authorization: false
+			body: "*"
 		};
 	}
 	rpc InsertUser(User) returns (User) {} // only rpc

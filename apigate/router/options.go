@@ -21,6 +21,7 @@ import (
 )
 
 type Options struct {
+	ApiBase  string
 	Registry registry.Registry
 }
 
@@ -39,5 +40,11 @@ func NewOptions(opts ...Option) Options {
 func WithRegistry(r registry.Registry) Option {
 	return func(o *Options) {
 		o.Registry = r
+	}
+}
+
+func WithApiBase(base string) Option {
+	return func(o *Options) {
+		o.ApiBase = base
 	}
 }

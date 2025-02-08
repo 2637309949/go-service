@@ -2,6 +2,7 @@ package registry
 
 import (
 	"net/http"
+
 	"go-micro.dev/v5/registry"
 )
 
@@ -9,13 +10,15 @@ import (
 // it uses proxy routing to resolve names
 // /foo becomes namespace.foo
 // /v1/foo becomes namespace.v1.foo
-type apiResolver struct{}
+type apiResolver struct {
+	apiBase string
+}
 
 func (r *apiResolver) Resolve(req *http.Request) *Endpoint {
 	path := req.URL.Path
 	method := req.Method
 	// get route
-	service, endpoint := apiRoute(req.URL.Path)
+	service, endpoint := apiRoute(r.apiBase, path)
 
 	// check for the namespace in the request header, this can be set by the client or injected
 	// by the auth wrapper if an auth token was provided. The headr takes priority over any domain
@@ -27,22 +30,21 @@ func (r *apiResolver) Resolve(req *http.Request) *Endpoint {
 	}
 
 	return &Endpoint{
-		Name:   	service,
-		Method: 	endpoint,
-		Domain: 	domain,
-		Path:   	path,
+		Name:       service,
+		Domain:     domain,
+		Path:       endpoint,
 		HTTPMethod: method,
 	}
 }
 
 type Endpoint struct {
-	Name   		string
-	Method 		string
-	Domain 		string
-	Path   		string   
-	HTTPMethod  string	
+	Name       string
+	Method     string
+	Domain     string
+	Path       string
+	HTTPMethod string
 }
 
-func NewResolver() *apiResolver {
-	return new(apiResolver)
+func NewResolver(apiBase string) *apiResolver {
+	return &apiResolver{apiBase}
 }

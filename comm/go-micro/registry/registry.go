@@ -50,13 +50,14 @@ type Node struct {
 }
 
 type Endpoint struct {
-	Request  *Value            `json:"request"`
-	Response *Value            `json:"response"`
-	Metadata map[string]string `json:"metadata"`
-	Name     string            `json:"name"`
-	Handler  string            `json:"handler"`
-	Path     string            `json:"path"`
-	Method   []string		   `json:"method"`
+	Request  		*Value            `json:"request"`
+	Response 		*Value            `json:"response"`
+	Metadata 		map[string]string `json:"metadata"`
+	Name     		string            `json:"name"`
+	Handler  		string            `json:"handler"`
+	Path     		string            `json:"path"`
+	Method   		[]string		  `json:"method"`
+	Authorization 	bool       	  `json:"authorization"`
 }
 
 type Value struct {
