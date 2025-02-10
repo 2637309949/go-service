@@ -75,7 +75,7 @@ func NewService(opts ...micro.Option) micro.Service {
 	// init db
 	var dbOpts []db.Options
 	json.Unmarshal(config.ConfBytes("db"), &dbOpts)
-	key := []byte("EsWSXS3S56C6p8jWT99g/w==")
+	key := []byte("D8a9sHSHAjsja9HJaJSD/w==")
 	for i, opt := range dbOpts {
 		tmp, _ := base64.StdEncoding.DecodeString(opt.Passwd)
 		var temp []byte
