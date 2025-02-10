@@ -13,6 +13,7 @@ Then install `protoc-gen-go` and `protoc-gen-micro`.
 ```
 cd ./comm/cmd/protoc-gen-micro && go install && cd ../../../
 cd ./comm/cmd/protobuf-go/cmd/protoc-gen-go && go install && cd ../../../../../
+cd ./comm/cmd/protobuf-go/cmd/protoc-gen-validate && go install && cd ../../../../../
 ```
 
 Then start consul

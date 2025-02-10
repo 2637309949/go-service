@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option go_package = "/;cache";
+
+import "google/api/annotations.proto";
+import "proto/cache/cache.proto";
+
+service CacheService {
+	// Get gets a cached value by key.
+	rpc Get(CacheFilter) returns (Cache) {
+		option (google.api.http) = {
+			get: "/Get" // expose httpApi
+			authorization: false
+			body: "*"
+		};
+    }
+	// Put stores a key-value pair into cache.
+	rpc Put(Cache) returns (Cache) {}
+	// Delete removes a key from cache.
+	rpc Delete(CacheFilter) returns (Cache) {}
+}
+

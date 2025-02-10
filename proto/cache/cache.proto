@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+import "validate/validate.proto";
+
+option go_package = "/;cache";
+
+message CacheFilter {
+	string key = 1 [json_name = "key"];
+}
+
+message Cache {
+	string key = 1 [json_name = "key", (validate.rules).string.min_len = 1];
+    bytes value = 2 [json_name = "value"];
+    int32 duration = 3 [json_name = "duration"];
+}
