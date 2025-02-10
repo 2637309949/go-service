@@ -6,6 +6,7 @@ require (
 	github.com/armon/go-metrics v0.4.1 // indirect
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
+	github.com/envoyproxy/protoc-gen-validate v1.2.1 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/forgoer/openssl v1.6.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
@@ -31,6 +32,7 @@ require (
 	github.com/micro/plugins/v5/registry/consul v0.0.0-00010101000000-000000000000 // indirect
 	github.com/micro/plugins/v5/source/consul v0.0.0-00010101000000-000000000000 // indirect
 	github.com/micro/plugins/v5/wrapper/trace/opentracing v0.0.0-00010101000000-000000000000 // indirect
+	github.com/micro/plugins/v5/wrapper/validator v0.0.0-00010101000000-000000000000 // indirect
 	github.com/miekg/dns v1.1.50 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/hashstructure v1.1.0 // indirect
@@ -50,9 +52,9 @@ require (
 	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20230817173708-d852ddb80c63 // indirect
 	golang.org/x/mod v0.18.0 // indirect
-	golang.org/x/net v0.33.0 // indirect
+	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.22.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250204164813-702378808489 // indirect
@@ -68,8 +70,8 @@ replace (
 	comm => ../comm
 	github.com/micro/plugins/v5/registry/consul => ../comm/plugins/registry/consul
 	github.com/micro/plugins/v5/source/consul => ../comm/plugins/source/consul
-    github.com/micro/plugins/v5/wrapper/validator => ../comm/plugins/wrapper/validator
 	github.com/micro/plugins/v5/wrapper/trace/opentracing => ../comm/plugins/wrapper/trace/opentracing
+	github.com/micro/plugins/v5/wrapper/validator => ../comm/plugins/wrapper/validator
 	go-micro.dev/v5 => ../comm/go-micro
 	proto => ../proto
 )

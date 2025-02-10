@@ -1,13 +1,31 @@
 syntax = "proto3";
 
+import "validate/validate.proto";
+
 option go_package = "/;user";
 
 message UserFilter {
-	string name = 1 [json_name = "name"];
+    int32 id = 1 [json_name = "id"];
+    int64 user_id = 2 [json_name = "user_id", (validate.rules).int64.gt = 0];
+	string user_name = 3 [json_name = "user_name"];
 }
 
 message User {
-	string greeting = 1 [json_name = "greeting"];
+    int32 id = 1 [json_name = "id"];
+    int64 user_id = 2 [json_name = "user_id"];
+    string user_name = 3 [json_name = "user_name"];
+    string nick_name = 4 [json_name = "nick_name"];
+    int32 sex = 5 [json_name = "sex"];
+    int32 age = 6 [json_name = "age"];
+    int64 phone = 7 [json_name = "phone"];
+    string email = 8 [json_name = "email"];
+    int32 reg_time = 9 [json_name = "reg_time"];
+    int32 last_login_time = 10 [json_name = "-"];
+    string last_login_ip = 11 [json_name = "-"];
+    int32 last_update_time = 12 [json_name = "-"];
+    string user_birth = 13 [json_name = "user_birth"];
+    string user_address = 14 [json_name = "user_address"];
+    int32 user_status = 15 [json_name = "-"];
 }
 
 message UserList {

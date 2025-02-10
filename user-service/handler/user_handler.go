@@ -22,8 +22,8 @@ func (h *Handler) QueryUserDetail(ctx context.Context, req *pbUser.UserFilter, r
 	session.Raw("SELECT 1 + 1 as sum").Scan(&result)
 	logger.Info(result.Sum) // 输出 2
 
-	logger.Infof("Greeting Hello: %v", req.Name)
-	rsp.Greeting = "Hello " + req.Name
+	logger.Infof("Greeting Hello: %v", req.UserId)
+	rsp.UserId = req.UserId
 	timemark.Mark("Greeting")
 
 	return nil

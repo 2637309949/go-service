@@ -48,7 +48,6 @@ func NewService(opts ...micro.Option) micro.Service {
 		}
 	})
 	opts = append(opts, micro.Registry(registry))
-	opts = append(opts, micro.WrapHandler(validator.NewHandlerWrapper()))
 	opts = append(opts, micro.WrapClient(opentracing.NewClientWrapper(nil)))
 	opts = append(opts, micro.WrapHandler(opentracing.NewHandlerWrapper(nil)))
 	opts = append(opts, micro.WrapSubscriber(opentracing.NewSubscriberWrapper(nil)))
@@ -58,6 +57,7 @@ func NewService(opts ...micro.Option) micro.Service {
 	opts = append(opts, micro.Context(ctx))
 	opts = append(opts, micro.WrapHandler(loggerWrapper(logger.DefaultLogger)))
 	opts = append(opts, micro.WrapHandler(loggerHandler))
+	opts = append(opts, micro.WrapHandler(validator.NewHandlerWrapper()))
 	service := &service{micro.NewService(
 		opts...,
 	)}
@@ -75,7 +75,7 @@ func NewService(opts ...micro.Option) micro.Service {
 	// init db
 	var dbOpts []db.Options
 	json.Unmarshal(config.ConfBytes("db"), &dbOpts)
-	key := []byte("Uu9sbdsduYUSudhs18dh/w==")
+	key := []byte("EsWSXS3S56C6p8jWT99g/w==")
 	for i, opt := range dbOpts {
 		tmp, _ := base64.StdEncoding.DecodeString(opt.Passwd)
 		var temp []byte
