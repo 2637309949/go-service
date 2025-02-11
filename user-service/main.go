@@ -2,6 +2,7 @@ package main
 
 import (
 	"comm/service"
+	pbCache "proto/cache"
 	pbUser "proto/user"
 	"user/handler"
 )
@@ -10,6 +11,9 @@ func main() {
 	service := service.NewService(
 		service.Name("user"),
 	)
-	pbUser.RegisterUserServiceHandler(service.Server(), new(handler.Handler))
+	h := handler.Handler{
+		CacheService: pbCache.NewCacheService("cache", service.Client()),
+	}
+	pbUser.RegisterUserServiceHandler(service.Server(), &h)
 	service.Run()
 }

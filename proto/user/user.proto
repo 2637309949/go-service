@@ -5,14 +5,18 @@ import "validate/validate.proto";
 option go_package = "/;user";
 
 message UserFilter {
-    int32 id = 1 [json_name = "id"];
-    int64 user_id = 2 [json_name = "user_id", (validate.rules).int64.gt = 0];
-	string user_name = 3 [json_name = "user_name"];
+	int32 page_no = 1 [json_name = "page_no"];
+	int32 page_size = 2 [json_name = "page_size"];
+	int32 order_type = 3 [json_name = "order_type"];
+	string order_col = 4 [json_name = "order_col"];
+    int32 id = 5 [json_name = "id"];
+    int64 user_id = 6 [json_name = "user_id", (validate.rules).int64.gt = 0];
+	string user_name = 7 [json_name = "user_name"];
 }
 
 message User {
     int32 id = 1 [json_name = "id"];
-    int64 user_id = 2 [json_name = "user_id"];
+    int64 user_id = 2 [json_name = "user_id", (validate.rules).int64.gt = 0];
     string user_name = 3 [json_name = "user_name"];
     string nick_name = 4 [json_name = "nick_name"];
     int32 sex = 5 [json_name = "sex"];

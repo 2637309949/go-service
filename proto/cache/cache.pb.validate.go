@@ -170,6 +170,8 @@ func (m *Cache) validate(all bool) error {
 
 	// no validation rules for Value
 
+	// no validation rules for Expiration
+
 	// no validation rules for Duration
 
 	if len(errors) > 0 {

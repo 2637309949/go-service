@@ -11,5 +11,6 @@ message CacheFilter {
 message Cache {
 	string key = 1 [json_name = "key", (validate.rules).string.min_len = 1];
     bytes value = 2 [json_name = "value"];
-    int32 duration = 3 [json_name = "duration"];
+    int64 expiration = 3 [json_name = "expiration"];
+    string duration = 4 [json_name = "duration"];
 }

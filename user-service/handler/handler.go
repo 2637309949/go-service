@@ -1,5 +1,9 @@
 package handler
 
-type Handler struct {
-}
+import (
+	pbCache "proto/cache"
+)
 
+type Handler struct {
+	CacheService pbCache.CacheService
+}

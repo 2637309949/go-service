@@ -57,6 +57,14 @@ func (m *UserFilter) validate(all bool) error {
 
 	var errors []error
 
+	// no validation rules for PageNo
+
+	// no validation rules for PageSize
+
+	// no validation rules for OrderType
+
+	// no validation rules for OrderCol
+
 	// no validation rules for Id
 
 	if m.GetUserId() <= 0 {
@@ -172,7 +180,16 @@ func (m *User) validate(all bool) error {
 
 	// no validation rules for Id
 
-	// no validation rules for UserId
+	if m.GetUserId() <= 0 {
+		err := UserValidationError{
+			field:  "UserId",
+			reason: "value must be greater than 0",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
 
 	// no validation rules for UserName
 
