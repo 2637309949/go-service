@@ -21,7 +21,6 @@ import (
 	"apigate/api"
 	bts "bytes"
 	"encoding/json"
-	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -59,14 +58,6 @@ type rpcHandler struct {
 	s    *api.Service
 }
 
-type buffer struct {
-	io.ReadCloser
-}
-
-func (b *buffer) Write(_ []byte) (int, error) {
-	return 0, nil
-}
-
 // see https://stackoverflow.com/questions/28595664/how-to-stop-json-marshal-from-escaping-and/28596225
 func jsonMarshal(t interface{}) ([]byte, error) {
 	buffer := &bts.Buffer{}
@@ -89,7 +80,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// try get service from router
 	service, err := h.opts.Router.Route(r)
 	if err != nil {
-		writeError(w, r, errors.InternalServerError("go.micro.api", err.Error()))
+		writeError(w, r, errors.InternalServerError("go.micro.api", "%s", err.Error()))
 		return
 	}
 	c := h.opts.Client
@@ -122,7 +113,9 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			nodes = append(nodes, node.Address)
 		}
 	}
-	callOpt := client.WithAddress(nodes...)
+
+	callOpt := []client.CallOption{}
+	callOpt = append(callOpt, client.WithAddress(nodes...))
 
 	// walk the standard call path
 	// get payload
@@ -152,8 +145,8 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		)
 
 		// make the call
-		var response *bytes.Frame
-		if err := c.Call(cx, req, response, callOpt); err != nil {
+		var response bytes.Frame
+		if err := c.Call(cx, req, &response, callOpt...); err != nil {
 			writeError(w, r, err)
 			return
 		}
@@ -172,7 +165,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// create request/response
-		var response interface{}
+		var response map[string]interface{}
 
 		req := c.NewRequest(
 			service.Name,
@@ -181,7 +174,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			client.WithContentType(ct),
 		)
 		// make the call
-		if err := c.Call(cx, req, &response, callOpt); err != nil {
+		if err := c.Call(cx, req, &response, callOpt...); err != nil {
 			writeError(w, r, err)
 			return
 		}
@@ -221,14 +214,8 @@ func writeError(w http.ResponseWriter, r *http.Request, err error) {
 
 	switch ce.Code {
 	case 0:
-		// assuming it's totally screwed
 		ce.Code = 500
-		ce.Id = "go.micro.api"
-		ce.Status = http.StatusText(500)
 		ce.Detail = "error during request: " + ce.Detail
-		w.WriteHeader(500)
-	default:
-		w.WriteHeader(int(ce.Code))
 	}
 
 	// Set trailers
@@ -239,7 +226,13 @@ func writeError(w http.ResponseWriter, r *http.Request, err error) {
 		w.Header().Set("grpc-message", ce.Detail)
 	}
 
-	_, werr := w.Write([]byte(ce.Error()))
+	var data map[string]interface{}
+	json.Unmarshal([]byte(ce.Error()), &data)
+	delete(data, "id")
+	delete(data, "status")
+	updated, _ := json.Marshal(data)
+	w.WriteHeader(200)
+	_, werr := w.Write(updated)
 	if werr != nil {
 		if logger.V(logger.ErrorLevel, logger.DefaultLogger) {
 			logger.Error(werr)

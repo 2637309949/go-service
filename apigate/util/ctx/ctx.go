@@ -20,7 +20,7 @@ import (
 	"net/textproto"
 	"strings"
 
-	metadata "micro.dev/v4/service/context"
+	"go-micro.dev/v5/metadata"
 )
 
 func FromRequest(r *http.Request) context.Context {

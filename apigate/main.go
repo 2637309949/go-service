@@ -10,24 +10,34 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/micro/plugins/v5/registry/consul"
+	"github.com/micro/plugins/v5/wrapper/trace/opentracing"
 	"go-micro.dev/v5/client"
 	"go-micro.dev/v5/config"
-	"go-micro.dev/v5/config/source/env"
 	"go-micro.dev/v5/logger"
 	regi "go-micro.dev/v5/registry"
 )
 
+var (
+	serviceName = "apigate"
+	apiBase     = "/api"
+)
+
 func main() {
 	logger.Info("Starting server")
-	apiBase := "/api"
+	initJaegerTracer(serviceName)
+	cli := client.DefaultClient
+	cli.Init(client.WrapCall(opentracing.NewCallWrapper(nil)))
+	cli.Init(client.WrapCall(modifyRsp))
+
 	consulAddress := config.Get("consul").String("")
 	consulRegistry := consul.NewRegistry(func(op *regi.Options) {
 		op.Addrs = []string{
 			consulAddress,
 		}
 	})
+
 	opts := []handler.Option{
-		handler.WithClient(client.DefaultClient),
+		handler.WithClient(cli),
 		handler.WithRouter(registry.NewRouter(
 			router.WithApiBase(apiBase),
 			router.WithRegistry(consulRegistry),
@@ -44,7 +54,7 @@ func main() {
 	}))
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"version": "1.0",
+			"version": "5.0",
 		})
 	})
 	r.GET("/favicon.ico", func(c *gin.Context) {})
@@ -54,11 +64,4 @@ func main() {
 	})
 	r.Run(":8080")
 	logger.Info("Stopping server")
-}
-
-func init() {
-	err := config.Load(env.NewSource())
-	if err != nil {
-		logger.Fatalf("Error source load: %v", err)
-	}
 }

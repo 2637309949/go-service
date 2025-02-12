@@ -19,22 +19,22 @@ var (
 )
 
 type User struct {
-	Id             int32  `gorm:"column:ID;primary_key" json:"id"`
-	UserId         int64  `gorm:"column:user_id" json:"user_id"`
-	UserName       string `gorm:"column:user_name" json:"user_name"`
-	NickName       string `gorm:"column:nick_name" json:"nick_name"`
-	Sex            int32  `gorm:"column:sex" json:"sex"`
-	Age            int32  `gorm:"column:age" json:"age"`
-	Phone          int64  `gorm:"column:phone" json:"phone"`
-	Email          string `gorm:"column:email" json:"email"`
-	RegTime        int32  `gorm:"column:reg_time" json:"reg_time"`
-	LastLoginTime  int32  `gorm:"column:last_login_time" json:"last_login_time"`
-	LastLoginIp    string `gorm:"column:last_login_ip" json:"last_login_ip"`
-	LastUpdateTime int32  `gorm:"column:last_update_time" json:"last_update_time"`
-	UserBirth      string `gorm:"column:user_birth" json:"user_birth"`
-	WechatId       string `gorm:"column:wechat_id" json:"wechat_id"`
-	UserAddress    string `gorm:"column:user_Address" json:"user_address"`
-	UserStatus     int32  `gorm:"column:user_status" json:"user_status"`
+	Id             int32  `gorm:"column:FID;primary_key" json:"id"`
+	UserId         int64  `gorm:"column:Fuser_id" json:"user_id"`
+	UserName       string `gorm:"column:Fuser_name" json:"user_name"`
+	NickName       string `gorm:"column:Fnick_name" json:"nick_name"`
+	Sex            int32  `gorm:"column:Fsex" json:"sex"`
+	Age            int32  `gorm:"column:Fage" json:"age"`
+	Phone          int64  `gorm:"column:Fphone" json:"phone"`
+	Email          string `gorm:"column:Femail" json:"email"`
+	RegTime        int32  `gorm:"column:Freg_time" json:"reg_time"`
+	LastLoginTime  int32  `gorm:"column:Flast_login_time" json:"last_login_time"`
+	LastLoginIp    string `gorm:"column:Flast_login_ip" json:"last_login_ip"`
+	LastUpdateTime int32  `gorm:"column:Flast_update_time" json:"last_update_time"`
+	UserBirth      string `gorm:"column:Fuser_birth" json:"user_birth"`
+	WechatId       string `gorm:"column:Fwechat_id" json:"wechat_id"`
+	UserAddress    string `gorm:"column:Fuser_Address" json:"user_address"`
+	UserStatus     int32  `gorm:"column:Fuser_status" json:"user_status"`
 }
 
 // TableName sets the insert table name for this struct type

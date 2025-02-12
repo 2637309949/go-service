@@ -151,3 +151,9 @@ func (h *Handler) DeleteUser(ctx context.Context, req *pbUser.User, rsp *pbUser.
 
 	return nil
 }
+
+func (h *Handler) Test(ctx context.Context, req *pbUser.User, rsp *pbUser.User) error {
+	logger := logger.Extract(ctx)
+	logger.Error("Test ok.")
+	return nil
+}

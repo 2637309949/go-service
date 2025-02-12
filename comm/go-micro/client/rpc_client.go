@@ -456,7 +456,7 @@ func (r *rpcClient) Call(ctx context.Context, request Request, response interfac
 	// should we noop right here?
 	select {
 	case <-ctx.Done():
-		return merrors.Timeout("go.micro.client", fmt.Sprintf("%v", ctx.Err()))
+		return merrors.Timeout("go.micro.client", "%+v", ctx.Err())
 	default:
 	}
 

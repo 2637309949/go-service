@@ -10,6 +10,12 @@ import (
 // Translates /foo/bar into api service micro.api.foo method Foo.Bar
 func apiRoute(base string, p string) (string, string) {
 	p = path.Clean(p)
+	if len(base) > 0 {
+		hasPrefix := strings.HasPrefix(p, base)
+		if !hasPrefix {
+			return "", ""
+		}
+	}
 	p = strings.TrimPrefix(p, base)
 	p = strings.TrimPrefix(p, "/")
 	parts := strings.SplitN(p, "/", 2)

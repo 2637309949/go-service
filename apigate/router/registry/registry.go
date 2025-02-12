@@ -77,7 +77,10 @@ func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
 	rp := r.resolver.Resolve(req)
 	name := rp.Name
 	reqPath := rp.Path
-	method := rp.Method
+	reqMethod := rp.Method
+	if len(name) == 0 {
+		return nil, errors.New("error during resolve: service not resolved")
+	}
 
 	// get service
 	services, err := r.rc.GetService(name, registry.GetDomain(rp.Domain))
@@ -93,15 +96,20 @@ func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
 		for j := range service.Endpoints {
 			endpoint := service.Endpoints[j]
 			httpEndpoint := server.Decode(endpoint.Metadata)
-			// todo dynamic matching
-			if httpEndpoint != nil && len(httpEndpoint.Path) > 0 {
-				edpPath := path.Clean(httpEndpoint.Path)
-				if edpPath == reqPath && httpEndpoint.Method == method {
-					httpServices = append(httpServices, service)
-					if len(endpointName) == 0 {
-						endpointName = httpEndpoint.Name
-					}
-				}
+			if httpEndpoint == nil {
+				continue
+			}
+			httpEndpoint.Path = path.Clean(httpEndpoint.Path)
+			if len(httpEndpoint.Path) == 0 {
+				continue
+			}
+
+			if httpEndpoint.Method != reqMethod || httpEndpoint.Path != reqPath {
+				continue
+			}
+			httpServices = append(httpServices, service)
+			if len(endpointName) == 0 {
+				endpointName = httpEndpoint.Name
 			}
 		}
 	}

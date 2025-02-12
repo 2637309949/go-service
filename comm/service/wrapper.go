@@ -2,18 +2,18 @@ package service
 
 import (
 	"context"
+	"strings"
 
 	"comm/logger"
 
-	"github.com/opentracing/opentracing-go"
-	"github.com/uber/jaeger-client-go"
+	"go-micro.dev/v5/metadata"
 	"go-micro.dev/v5/server"
 )
 
 func loggerHandler(h server.HandlerFunc) server.HandlerFunc {
 	return func(ctx context.Context, req server.Request, rsp interface{}) error {
 		logger := logger.Extract(ctx)
-		logger.Infof("========== invoke %s ==========", req.Endpoint())
+		logger.WithFields(map[string]interface{}{"invoke": req.Endpoint()}).Info(">>>>>>>>>>>>>>>>>>>>>")
 		return h(ctx, req, rsp)
 	}
 }
@@ -26,13 +26,13 @@ func loggerWrapper(l logger.Logger) server.HandlerWrapper {
 		return func(ctx context.Context, req server.Request, rsp interface{}) error {
 			_, ok := logger.FromContext(ctx)
 			if !ok {
-				span := opentracing.SpanFromContext(ctx)
-				traceID := ""
-				if span != nil {
-					traceID = span.Context().(jaeger.SpanContext).TraceID().String()
+				if md, ok := metadata.FromContext(ctx); ok {
+					if traceID, exists := md["Uber-Trace-Id"]; exists {
+						traceID = strings.Split(traceID, ":")[0]
+						l = l.Fields(map[string]interface{}{"traceid": traceID})
+						ctx = logger.NewContext(ctx, l)
+					}
 				}
-				l = l.Fields(map[string]interface{}{"traceid": traceID})
-				ctx = logger.NewContext(ctx, l)
 			}
 			if err := h(ctx, req, rsp); err != nil {
 				return err

@@ -52,7 +52,7 @@ var DBFormatter = func(values ...interface{}) (messages []interface{}) {
 
 		if level == "sql" {
 			// duration
-			messages = append(messages, values[2])
+			messages = append(messages, fmt.Sprintf("%+v ", values[2]))
 			// sql
 			for _, value := range values[4].([]interface{}) {
 				indirectValue := reflect.Indirect(reflect.ValueOf(value))
@@ -107,7 +107,7 @@ var DBFormatter = func(values ...interface{}) (messages []interface{}) {
 			}
 
 			messages = append(messages, sql)
-			messages = append(messages, " ["+strconv.FormatInt(values[5].(int64), 10)+" rows affected or returned] ")
+			messages = append(messages, " ["+strconv.FormatInt(values[5].(int64), 10)+" rows affected] ")
 		} else {
 			messages = append(messages, values[2:]...)
 		}
