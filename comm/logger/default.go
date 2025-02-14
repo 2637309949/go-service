@@ -133,14 +133,20 @@ func (l *defaultLogger) Log(level logger.Level, v ...interface{}) {
 
 	metadata := ""
 
+	color := ""
+	colored := ""
 	for _, k := range keys {
 		metadata += fmt.Sprintf(" %s=%v", k, fields[k])
+		if k == "invoke" {
+			color = "\033[32m"
+			colored = "\033[0m"
+		}
 	}
 
 	dlog.DefaultLog.Write(rec)
 
 	t := rec.Timestamp.Format("2006-01-02 15:04:05")
-	fmt.Printf("%s %s %v\n", t, metadata, rec.Message)
+	fmt.Printf("%s%s%s %v%s\n", color, t, metadata, rec.Message, colored)
 }
 
 func (l *defaultLogger) Logf(level logger.Level, format string, v ...interface{}) {
@@ -175,14 +181,20 @@ func (l *defaultLogger) Logf(level logger.Level, format string, v ...interface{}
 
 	metadata := ""
 
+	color := ""
+	colored := ""
 	for _, k := range keys {
 		metadata += fmt.Sprintf(" %s=%v", k, fields[k])
+		if k == "invoke" {
+			color = "\033[32m"
+			colored = "\033[0m"
+		}
 	}
 
 	dlog.DefaultLog.Write(rec)
 
 	t := rec.Timestamp.Format("2006-01-02 15:04:05")
-	fmt.Printf("%s %s %v\n", t, metadata, rec.Message)
+	fmt.Printf("%s%s%s %v%s\n", color, t, metadata, rec.Message, colored)
 }
 
 func (l *defaultLogger) Options() logger.Options {

@@ -84,3 +84,12 @@ func WithMaxRecvSize(size int64) Option {
 		o.MaxRecvSize = size
 	}
 }
+
+func WithWrapCall(cw ...client.CallWrapper) Option {
+	return func(o *Options) {
+		if o.Client == nil {
+			WithClient(client.DefaultClient)(o)
+		}
+		o.Client.Init(client.WrapCall(cw...))
+	}
+}

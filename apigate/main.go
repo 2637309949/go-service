@@ -7,11 +7,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/micro/plugins/v5/registry/consul"
 	"github.com/micro/plugins/v5/wrapper/trace/opentracing"
-	"go-micro.dev/v5/client"
 	"go-micro.dev/v5/config"
 	"go-micro.dev/v5/logger"
 	regi "go-micro.dev/v5/registry"
@@ -24,11 +22,7 @@ var (
 
 func main() {
 	logger.Info("Starting server")
-	initJaegerTracer(serviceName)
-	cli := client.DefaultClient
-	cli.Init(client.WrapCall(opentracing.NewCallWrapper(nil)))
-	cli.Init(client.WrapCall(modifyRsp))
-
+	tracer := initJaegerTracer(serviceName)
 	consulAddress := config.Get("consul").String("")
 	consulRegistry := consul.NewRegistry(func(op *regi.Options) {
 		op.Addrs = []string{
@@ -36,29 +30,28 @@ func main() {
 		}
 	})
 
-	opts := []handler.Option{
-		handler.WithClient(cli),
-		handler.WithRouter(registry.NewRouter(
+	opts := []handler.Option{}
+	opts = append(opts, handler.WithRouter(
+		registry.NewRouter(
 			router.WithApiBase(apiBase),
+			router.WithAuth(new(jwt)),
 			router.WithRegistry(consulRegistry),
-		)),
-	}
+		),
+	))
+	opts = append(opts, handler.WithWrapCall(opentracing.NewCallWrapper(tracer)))
 	hd := handler.NewHandler(opts...)
 
 	gin.DefaultWriter = io.Discard
 	r := gin.Default()
-	r.Use(cors.New(cors.Config{
-		AllowAllOrigins: true,
-		AllowMethods:    []string{"POST", "PATCH", "GET", "OPTIONS", "PUT", "DELETE"},
-		AllowHeaders:    []string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "Micro-Namespace"},
-	}))
+	r.Use(corsMiddle)
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"version": "5.0",
+			"version": "5.1",
 		})
 	})
 	r.GET("/favicon.ico", func(c *gin.Context) {})
-	r.Use(auth(apiBase))
+	r.Use(resolverMiddle(apiBase))
+	r.Use(tracerMiddle(tracer))
 	r.NoRoute(func(c *gin.Context) {
 		hd.ServeHTTP(c.Writer, c.Request)
 	})

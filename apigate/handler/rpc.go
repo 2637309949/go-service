@@ -208,10 +208,13 @@ func hasCodec(ct string, codecs []string) bool {
 func writeError(w http.ResponseWriter, r *http.Request, err error) {
 	// response content type
 	w.Header().Set("Content-Type", "application/json")
-
+	traceID := ""
+	if md, ok := metadata.FromContext(r.Context()); ok {
+		traceID = md["Uber-Trace-Id"]
+		traceID = strings.Split(traceID, ":")[0]
+	}
 	// parse out the error code
 	ce := errors.Parse(err.Error())
-
 	switch ce.Code {
 	case 0:
 		ce.Code = 500
@@ -230,12 +233,20 @@ func writeError(w http.ResponseWriter, r *http.Request, err error) {
 	json.Unmarshal([]byte(ce.Error()), &data)
 	delete(data, "id")
 	delete(data, "status")
-	updated, _ := json.Marshal(data)
-	w.WriteHeader(200)
-	_, werr := w.Write(updated)
-	if werr != nil {
+	if len(traceID) > 0 {
+		data["request_id"] = traceID
+	}
+	updated, err := json.Marshal(data)
+	if err != nil {
 		if logger.V(logger.ErrorLevel, logger.DefaultLogger) {
-			logger.Error(werr)
+			logger.Error(err)
+		}
+	}
+	w.WriteHeader(200)
+	_, err = w.Write(updated)
+	if err != nil {
+		if logger.V(logger.ErrorLevel, logger.DefaultLogger) {
+			logger.Error(err)
 		}
 	}
 }
@@ -243,7 +254,12 @@ func writeError(w http.ResponseWriter, r *http.Request, err error) {
 func writeResponse(w http.ResponseWriter, r *http.Request, rsp []byte, ct string) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", ct)
-	w.Header().Set("Content-Length", strconv.Itoa(len(rsp)))
+
+	traceID := ""
+	if md, ok := metadata.FromContext(r.Context()); ok {
+		traceID = md["Uber-Trace-Id"]
+		traceID = strings.Split(traceID, ":")[0]
+	}
 
 	// Set trailers
 	if strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
@@ -258,14 +274,44 @@ func writeResponse(w http.ResponseWriter, r *http.Request, rsp []byte, ct string
 		w.WriteHeader(http.StatusNoContent)
 	}
 
-	// write response
-	_, err := w.Write(rsp)
+	v := map[string]interface{}{}
+	err := json.Unmarshal(rsp, &v)
+	if err != nil {
+		if logger.V(logger.ErrorLevel, logger.DefaultLogger) {
+			logger.Error(err)
+		}
+	}
+	if dataField, ok := v["data"]; ok {
+		if _, ok := dataField.([]interface{}); ok {
+			v["code"] = 200
+			if len(traceID) > 0 {
+				v["request_id"] = traceID
+			}
+		}
+	} else {
+		newRsp := make(map[string]interface{})
+		newRsp["data"] = v
+		newRsp["code"] = 200
+		if len(traceID) > 0 {
+			newRsp["request_id"] = traceID
+		}
+		v = newRsp
+	}
+	rsp, err = jsonMarshal(v)
 	if err != nil {
 		if logger.V(logger.ErrorLevel, logger.DefaultLogger) {
 			logger.Error(err)
 		}
 	}
 
+	// write response
+	w.Header().Set("Content-Length", strconv.Itoa(len(rsp)))
+	_, err = w.Write(rsp)
+	if err != nil {
+		if logger.V(logger.ErrorLevel, logger.DefaultLogger) {
+			logger.Error(err)
+		}
+	}
 }
 
 func NewHandler(opts ...Option) Handler {

@@ -2,8 +2,16 @@ package registry
 
 import (
 	"net/http"
+	"strings"
 
 	"go-micro.dev/v5/registry"
+)
+
+const (
+	// BearerScheme used for Authorization header
+	BearerScheme = "Bearer "
+	// TokenCookieName is the name of the cookie which stores the auth token
+	TokenCookieName = "micro-token"
 )
 
 // default resolver for legacy purposes
@@ -28,19 +36,33 @@ func (r *apiResolver) Resolve(req *http.Request) *Endpoint {
 		domain = dom
 	}
 
+	// check Authorization
+	// Extract the token from the request
+	var token string
+	if header := req.Header.Get("Authorization"); len(header) > 0 {
+		// Extract the auth token from the request
+		if strings.HasPrefix(header, BearerScheme) {
+			token = header[len(BearerScheme):]
+		}
+	}
+
 	return &Endpoint{
 		Name:   service,
 		Domain: domain,
 		Path:   endpoint,
 		Method: method,
+		Token:  token,
 	}
 }
 
 type Endpoint struct {
-	Name   string
-	Method string
-	Domain string
-	Path   string
+	Name          string
+	Path          string
+	Method        string
+	Domain        string
+	Token         string
+	Authorization bool
+	Scope         string
 }
 
 func NewResolver(apiBase string) *apiResolver {

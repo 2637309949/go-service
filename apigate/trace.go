@@ -6,7 +6,7 @@ import (
 	"go-micro.dev/v5/logger"
 )
 
-func initJaegerTracer(serviceName string) {
+func initJaegerTracer(serviceName string) opentracing.Tracer {
 	cfg := &config.Configuration{
 		ServiceName: serviceName,
 		Sampler: &config.SamplerConfig{
@@ -23,4 +23,6 @@ func initJaegerTracer(serviceName string) {
 		logger.Fatalf("Error tracer: %v", err)
 	}
 	opentracing.SetGlobalTracer(tracer)
+
+	return tracer
 }

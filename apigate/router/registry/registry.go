@@ -3,28 +3,15 @@ package registry
 import (
 	"apigate/api"
 	"apigate/router"
+	"apigate/router/auth"
 	"errors"
 	"net/http"
 	"path"
-	"regexp"
-
-	util "apigate/util/router"
 
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/registry/cache"
 	"go-micro.dev/v5/server"
 )
-
-var (
-	errNotFound = errors.New("not found")
-)
-
-// endpoint struct, that holds compiled pcre
-type endpoint struct {
-	hostregs []*regexp.Regexp
-	pathregs []util.Pattern
-	pcreregs []*regexp.Regexp
-}
 
 // router is the default router
 type registryRouter struct {
@@ -75,57 +62,109 @@ func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
 
 	// resolve service
 	rp := r.resolver.Resolve(req)
-	name := rp.Name
-	reqPath := rp.Path
-	reqMethod := rp.Method
-	if len(name) == 0 {
+	if len(rp.Name) == 0 {
 		return nil, errors.New("error during resolve: service not resolved")
 	}
 
 	// get service
-	services, err := r.rc.GetService(name, registry.GetDomain(rp.Domain))
+	services, err := r.rc.GetService(rp.Name, registry.GetDomain(rp.Domain))
 	if err != nil {
 		return nil, err
 	}
 
-	// filter httpapi
-	endpointName := ""
-	httpServices := []*registry.Service{}
+	// route match
+	sv, err := r.match(rp, services)
+	if err != nil {
+		return nil, err
+	}
+
+	// auth match
+	err = r.auth(req, rp)
+	if err != nil {
+		return nil, err
+	}
+
+	return sv, err
+}
+
+func (r *registryRouter) auth(req *http.Request, rp *Endpoint) error {
+	cx := req.Context()
+
+	if rp.Authorization {
+		if r.opts.Auth == nil {
+			return errors.New("no auth policy found")
+		}
+		acc, err := r.opts.Auth.Inspect(rp.Token, auth.WithContext(cx), auth.Host(req.Host))
+		if err != nil {
+			return err
+		}
+		if len(rp.Scope) > 0 {
+			err = r.opts.Auth.Verify(acc, rp.Scope, auth.WithContext(cx), auth.Host(req.Host))
+			if err != nil {
+				return err
+			}
+		}
+		// set context
+	}
+
+	return nil
+}
+
+func (r *registryRouter) match(rp *Endpoint, services []*registry.Service) (*api.Service, error) {
+	sv := api.Service{
+		Name: rp.Name,
+		Endpoint: &api.Endpoint{
+			Handler: "rpc",
+		},
+		Services: services,
+	}
+
+	authorization := false
+	scope := ""
+
 	for i := range services {
 		service := services[i]
 		for j := range service.Endpoints {
 			endpoint := service.Endpoints[j]
-			httpEndpoint := server.Decode(endpoint.Metadata)
-			if httpEndpoint == nil {
-				continue
-			}
-			httpEndpoint.Path = path.Clean(httpEndpoint.Path)
-			if len(httpEndpoint.Path) == 0 {
+			desc := server.Decode(endpoint.Metadata)
+			if desc == nil {
 				continue
 			}
 
-			if httpEndpoint.Method != reqMethod || httpEndpoint.Path != reqPath {
+			desc.Path = path.Clean(desc.Path)
+			if len(desc.Path) == 0 {
 				continue
 			}
-			httpServices = append(httpServices, service)
-			if len(endpointName) == 0 {
-				endpointName = httpEndpoint.Name
+
+			if desc.Method != rp.Method || desc.Path != rp.Path {
+				continue
 			}
+
+			if desc.Authorization {
+				authorization = true
+			}
+
+			if len(scope) == 0 {
+				scope = desc.Scope
+			}
+
+			if len(sv.Endpoint.Name) == 0 {
+				sv.Endpoint.Name = desc.Name
+			}
+
+			sv.Services = append(sv.Services, service)
 		}
 	}
-	if len(httpServices) == 0 || len(endpointName) == 0 {
+
+	rp.Authorization = authorization
+	rp.Scope = scope
+
+	if len(sv.Services) == 0 || len(sv.Endpoint.Name) == 0 {
 		return nil, errors.New("rpc: can't find service Endpoint")
 	}
 
 	// construct api service
-	return &api.Service{
-		Name: name,
-		Endpoint: &api.Endpoint{
-			Name:    endpointName,
-			Handler: "rpc",
-		},
-		Services: services,
-	}, nil
+	return &sv, nil
 }
 
 func newRouter(opts ...router.Option) *registryRouter {

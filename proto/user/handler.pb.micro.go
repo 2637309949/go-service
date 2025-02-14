@@ -34,22 +34,17 @@ func NewUserServiceEndpoints() []*registry.Endpoint {
 	return []*registry.Endpoint{
 		{
 			Authorization: false,
+			Scope:         "user",
 			Name:          "UserService.QueryUser",
 			Path:          "/QueryUser",
 			Method:        "GET",
 			Handler:       "rpc",
 		},
 		{
-			Authorization: false,
+			Authorization: true,
+			Scope:         "user",
 			Name:          "UserService.QueryUserDetail",
 			Path:          "/QueryUserDetail",
-			Method:        "GET",
-			Handler:       "rpc",
-		},
-		{
-			Authorization: false,
-			Name:          "UserService.Test",
-			Path:          "/Test",
 			Method:        "GET",
 			Handler:       "rpc",
 		},
@@ -64,7 +59,6 @@ type UserService interface {
 	InsertUser(ctx context.Context, in *User, opts ...client.CallOption) (*User, error)
 	UpdateUser(ctx context.Context, in *User, opts ...client.CallOption) (*User, error)
 	DeleteUser(ctx context.Context, in *User, opts ...client.CallOption) (*User, error)
-	Test(ctx context.Context, in *User, opts ...client.CallOption) (*User, error)
 }
 
 type userService struct {
@@ -129,16 +123,6 @@ func (c *userService) DeleteUser(ctx context.Context, in *User, opts ...client.C
 	return out, nil
 }
 
-func (c *userService) Test(ctx context.Context, in *User, opts ...client.CallOption) (*User, error) {
-	req := c.c.NewRequest(c.name, "UserService.Test", in)
-	out := new(User)
-	err := c.c.Call(ctx, req, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // Server API for UserService service
 
 type UserServiceHandler interface {
@@ -147,7 +131,6 @@ type UserServiceHandler interface {
 	InsertUser(context.Context, *User, *User) error
 	UpdateUser(context.Context, *User, *User) error
 	DeleteUser(context.Context, *User, *User) error
-	Test(context.Context, *User, *User) error
 }
 
 func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts ...server.HandlerOption) error {
@@ -157,7 +140,6 @@ func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts .
 		InsertUser(ctx context.Context, in *User, out *User) error
 		UpdateUser(ctx context.Context, in *User, out *User) error
 		DeleteUser(ctx context.Context, in *User, out *User) error
-		Test(ctx context.Context, in *User, out *User) error
 	}
 	type UserService struct {
 		userService
@@ -165,22 +147,17 @@ func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts .
 	h := &userServiceHandler{hdlr}
 	opts = append(opts, server.WithEndpoint(&registry.Endpoint{
 		Authorization: false,
+		Scope:         "user",
 		Name:          "UserService.QueryUser",
 		Path:          "/QueryUser",
 		Method:        "GET",
 		Handler:       "rpc",
 	}))
 	opts = append(opts, server.WithEndpoint(&registry.Endpoint{
-		Authorization: false,
+		Authorization: true,
+		Scope:         "user",
 		Name:          "UserService.QueryUserDetail",
 		Path:          "/QueryUserDetail",
-		Method:        "GET",
-		Handler:       "rpc",
-	}))
-	opts = append(opts, server.WithEndpoint(&registry.Endpoint{
-		Authorization: false,
-		Name:          "UserService.Test",
-		Path:          "/Test",
 		Method:        "GET",
 		Handler:       "rpc",
 	}))
@@ -209,8 +186,4 @@ func (h *userServiceHandler) UpdateUser(ctx context.Context, in *User, out *User
 
 func (h *userServiceHandler) DeleteUser(ctx context.Context, in *User, out *User) error {
 	return h.UserServiceHandler.DeleteUser(ctx, in, out)
-}
-
-func (h *userServiceHandler) Test(ctx context.Context, in *User, out *User) error {
-	return h.UserServiceHandler.Test(ctx, in, out)
 }

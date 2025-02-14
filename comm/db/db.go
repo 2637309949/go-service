@@ -78,7 +78,7 @@ func (s *DB) init() {
 
 		s.dbs[conn.Db] = append(s.dbs[conn.Db], db)
 
-		logger.Infof("Init success, name:[%s] [%p]", conn.Db, db)
+		logger.Infof("init success, name:%s", conn.Db)
 	}
 }
 

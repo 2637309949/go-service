@@ -58,6 +58,7 @@ type Endpoint struct {
 	Path          string            `json:"path"`
 	Method        string            `json:"method"`
 	Authorization bool              `json:"authorization"`
+	Scope         string            `json:"scope"`
 }
 
 type Value struct {

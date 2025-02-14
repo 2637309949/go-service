@@ -6,6 +6,7 @@ require (
 	github.com/evanphx/json-patch/v5 v5.9.0
 	github.com/gin-contrib/cors v1.7.3
 	github.com/gin-gonic/gin v1.10.0
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/micro/plugins/v5/registry/consul v0.0.0-00010101000000-000000000000
 	github.com/micro/plugins/v5/wrapper/trace/opentracing v0.0.0-00010101000000-000000000000
 	github.com/opentracing/opentracing-go v1.2.0

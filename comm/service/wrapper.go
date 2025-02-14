@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"comm/logger"
@@ -13,7 +14,14 @@ import (
 func loggerHandler(h server.HandlerFunc) server.HandlerFunc {
 	return func(ctx context.Context, req server.Request, rsp interface{}) error {
 		logger := logger.Extract(ctx)
-		logger.WithFields(map[string]interface{}{"invoke": req.Endpoint()}).Info(">>>>>>>>>>>>>>>>>>>>>")
+		fields := map[string]interface{}{"invoke": req.Endpoint()}
+		if md, ok := metadata.FromContext(ctx); ok {
+			fmt.Printf("%+v\n", md)
+			if v, ok := md["Remote"]; ok {
+				fields["Remote"] = v
+			}
+		}
+		logger.WithFields(fields).Info("")
 		return h(ctx, req, rsp)
 	}
 }

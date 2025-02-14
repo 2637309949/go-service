@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"strconv"
 
 	"go-micro.dev/v5/registry"
 )
@@ -45,7 +46,8 @@ func Encode(e *registry.Endpoint) map[string]string {
 	set("handler", e.Handler)
 	set("method", e.Method)
 	set("path", e.Path)
-
+	set("authorization", strconv.FormatBool(e.Authorization))
+	set("scope", e.Scope)
 	return ep
 }
 
@@ -54,12 +56,14 @@ func Decode(e map[string]string) *registry.Endpoint {
 	if e == nil {
 		return nil
 	}
-
+	authorization, _ := strconv.ParseBool(e["authorization"])
 	return &registry.Endpoint{
-		Name:    e["endpoint"],
-		Method:  e["method"],
-		Path:    e["path"],
-		Handler: e["handler"],
+		Name:          e["endpoint"],
+		Method:        e["method"],
+		Path:          e["path"],
+		Handler:       e["handler"],
+		Authorization: authorization,
+		Scope:         e["scope"],
 	}
 }
 

@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -51,8 +50,6 @@ var DBFormatter = func(values ...interface{}) (messages []interface{}) {
 		messages = []interface{}{result}
 
 		if level == "sql" {
-			// duration
-			messages = append(messages, fmt.Sprintf("%+v ", values[2]))
 			// sql
 			for _, value := range values[4].([]interface{}) {
 				indirectValue := reflect.Indirect(reflect.ValueOf(value))
@@ -105,9 +102,10 @@ var DBFormatter = func(values ...interface{}) (messages []interface{}) {
 					}
 				}
 			}
-
+			// duration
+			duration := values[2]
 			messages = append(messages, sql)
-			messages = append(messages, " ["+strconv.FormatInt(values[5].(int64), 10)+" rows affected] ")
+			messages = append(messages, fmt.Sprintf(" [%v rows affected %v]", values[5].(int64), duration))
 		} else {
 			messages = append(messages, values[2:]...)
 		}

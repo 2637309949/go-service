@@ -10,13 +10,15 @@ service UserService {
 		option (google.api.http) = {
 			get: "/QueryUser" // expose httpApi
 			authorization: false
+			scope: "user"
 			body: "*"
 		};
 	}
 	rpc QueryUserDetail(UserFilter) returns (User) {
 		option (google.api.http) = {
 			get: "/QueryUserDetail" // expose httpApi
-			authorization: false
+			authorization: true
+			scope: "user"
 			body: "*"
 		};
 	}
