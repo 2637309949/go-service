@@ -16,7 +16,6 @@ func loggerHandler(h server.HandlerFunc) server.HandlerFunc {
 		logger := logger.Extract(ctx)
 		fields := map[string]interface{}{"invoke": req.Endpoint()}
 		if md, ok := metadata.FromContext(ctx); ok {
-			fmt.Printf("%+v\n", md)
 			if v, ok := md["Remote"]; ok {
 				fields["Remote"] = v
 			}
