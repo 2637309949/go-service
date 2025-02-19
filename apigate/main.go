@@ -11,6 +11,7 @@ import (
 	"github.com/micro/plugins/v5/registry/consul"
 	"github.com/micro/plugins/v5/wrapper/trace/opentracing"
 	"go-micro.dev/v5/config"
+	"go-micro.dev/v5/config/source/env"
 	"go-micro.dev/v5/logger"
 	regi "go-micro.dev/v5/registry"
 )
@@ -22,6 +23,10 @@ var (
 
 func main() {
 	logger.Info("Starting server")
+	err := config.Load(env.NewSource())
+	if err != nil {
+		logger.Fatalf("Error source load: %v", err)
+	}
 	tracer := initJaegerTracer(serviceName)
 	consulAddress := config.Get("consul").String("")
 	consulRegistry := consul.NewRegistry(func(op *regi.Options) {
@@ -31,15 +36,15 @@ func main() {
 	})
 
 	opts := []handler.Option{}
+	opts = append(opts, handler.WithApiBase(apiBase))
 	opts = append(opts, handler.WithRouter(
 		registry.NewRouter(
-			router.WithApiBase(apiBase),
 			router.WithAuth(new(jwt)),
 			router.WithRegistry(consulRegistry),
 		),
 	))
 	opts = append(opts, handler.WithWrapCall(opentracing.NewCallWrapper(tracer)))
-	hd := handler.NewHandler(opts...)
+	hd := NewHandler(opts...)
 
 	gin.DefaultWriter = io.Discard
 	r := gin.Default()

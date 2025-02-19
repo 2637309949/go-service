@@ -19,14 +19,13 @@ const (
 // /foo becomes namespace.foo
 // /v1/foo becomes namespace.v1.foo
 type apiResolver struct {
-	apiBase string
 }
 
-func (r *apiResolver) Resolve(req *http.Request) *Endpoint {
+func (r *apiResolver) Resolve(apiBase string, req *http.Request) *Endpoint {
 	path := req.URL.Path
 	method := req.Method
 	// get route
-	service, endpoint := apiRoute(r.apiBase, path)
+	service, endpoint := apiRoute(apiBase, path)
 
 	// check for the namespace in the request header, this can be set by the client or injected
 	// by the auth wrapper if an auth token was provided. The headr takes priority over any domain
@@ -65,6 +64,6 @@ type Endpoint struct {
 	Scope         string
 }
 
-func NewResolver(apiBase string) *apiResolver {
-	return &apiResolver{apiBase}
+func NewResolver() *apiResolver {
+	return &apiResolver{}
 }

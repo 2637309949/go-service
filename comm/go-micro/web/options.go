@@ -20,6 +20,8 @@ type Options struct {
 
 	Service micro.Service
 
+	Endpoints []*registry.Endpoint
+
 	Registry registry.Registry
 
 	// Alternative Options
@@ -274,5 +276,12 @@ func HandleSignal(b bool) Option {
 func Logger(l logger.Logger) Option {
 	return func(o *Options) {
 		o.Logger = l
+	}
+}
+
+// add endpoint for meta
+func Endpoint(e *registry.Endpoint) Option {
+	return func(o *Options) {
+		o.Endpoints = append(o.Endpoints, e)
 	}
 }

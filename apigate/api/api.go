@@ -15,12 +15,9 @@
 package api
 
 import (
-	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http"
-	"regexp"
 	"strings"
 
 	jsonpatch "github.com/evanphx/json-patch/v5"
@@ -30,66 +27,11 @@ import (
 	"github.com/oxtoacart/bpool"
 	"go-micro.dev/v5/metadata"
 	"go-micro.dev/v5/registry"
-	"go-micro.dev/v5/server"
 )
 
 var (
 	bufferPool = bpool.NewSizedBufferPool(1024, 8)
 )
-
-type buffer struct {
-	io.ReadCloser
-}
-
-func (b *buffer) Write(_ []byte) (int, error) {
-	return 0, nil
-}
-
-// Server serves api requests
-type Server interface {
-	Address() string
-	Init(opts ...Option) error
-	Handle(path string, handler http.Handler)
-	Start() error
-	Stop() error
-}
-
-type Options struct {
-	EnableACME bool
-	EnableCORS bool
-	EnableTLS  bool
-	ACMEHosts  []string
-	TLSConfig  *tls.Config
-	Wrappers   []Wrapper
-}
-
-type Option func(*Options)
-
-type Wrapper func(h http.Handler) http.Handler
-
-func WrapHandler(w ...Wrapper) Option {
-	return func(o *Options) {
-		o.Wrappers = append(o.Wrappers, w...)
-	}
-}
-
-func EnableCORS(b bool) Option {
-	return func(o *Options) {
-		o.EnableCORS = b
-	}
-}
-
-func EnableTLS(b bool) Option {
-	return func(o *Options) {
-		o.EnableTLS = b
-	}
-}
-
-func TLSConfig(t *tls.Config) Option {
-	return func(o *Options) {
-		o.TLSConfig = t
-	}
-}
 
 // Endpoint is a mapping between an RPC method and HTTP endpoint
 type Endpoint struct {
@@ -127,86 +69,6 @@ type Service struct {
 	Services []*registry.Service
 }
 
-// Encode encodes an endpoint to endpoint metadata
-func Encode(e *Endpoint) map[string]string {
-	if e == nil {
-		return nil
-	}
-
-	// endpoint map
-	ep := make(map[string]string)
-
-	// set vals only if they exist
-	set := func(k, v string) {
-		if len(v) == 0 {
-			return
-		}
-		ep[k] = v
-	}
-
-	set("endpoint", e.Name)
-	set("description", e.Description)
-	set("handler", e.Handler)
-	set("method", strings.Join(e.Method, ","))
-	set("path", e.Path)
-	set("host", strings.Join(e.Host, ","))
-
-	return ep
-}
-
-// Decode decodes endpoint metadata into an endpoint
-func Decode(e map[string]string) *Endpoint {
-	if e == nil {
-		return nil
-	}
-
-	return &Endpoint{
-		Name:        e["endpoint"],
-		Description: e["description"],
-		Method:      slice(e["method"]),
-		Path:        e["path"],
-		Host:        slice(e["host"]),
-		Handler:     e["handler"],
-	}
-}
-
-// Validate validates an endpoint to guarantee it won't blow up when being served
-func Validate(e *Endpoint) error {
-	if e == nil {
-		return errors.New("endpoint is nil")
-	}
-
-	if len(e.Name) == 0 {
-		return errors.New("name required")
-	}
-
-	_, err := regexp.CompilePOSIX(e.Path)
-	if err != nil {
-		return err
-	}
-	if len(e.Handler) == 0 {
-		return errors.New("invalid handler")
-	}
-
-	return nil
-}
-
-func WithEndpoint(e *Endpoint) server.HandlerOption {
-	return server.EndpointMetadata(e.Name, Encode(e))
-}
-
-func slice(s string) []string {
-	var sl []string
-
-	for _, p := range strings.Split(s, ",") {
-		if str := strings.TrimSpace(p); len(str) > 0 {
-			sl = append(sl, strings.TrimSpace(p))
-		}
-	}
-
-	return sl
-}
-
 // RequestPayload takes a *http.Request and returns the payload
 // If the request is a GET the query string parameters are extracted and marshaled to JSON and the raw bytes are returned.
 // If the request method is a POST the request body is read and returned
@@ -237,7 +99,7 @@ func RequestPayload(r *http.Request) ([]byte, error) {
 		for k, v := range r.MultipartForm.Value {
 			vals[k] = strings.Join(v, ",")
 		}
-		for k, _ := range r.MultipartForm.File {
+		for k := range r.MultipartForm.File {
 			f, _, err := r.FormFile(k)
 			if err != nil {
 				return nil, err

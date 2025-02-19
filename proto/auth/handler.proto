@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option go_package = "/;auth";
+
+import "proto/auth/auth.proto";
+
+service AuthService {
+	rpc Generate(Account) returns (Token) {}
+	rpc Inspect(Token) returns (Account) {}
+	rpc Verify(Credential) returns (Empty) {}
+	rpc Refresh(Token) returns (Token) {}
+}

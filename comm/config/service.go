@@ -1,13 +1,16 @@
 package config
 
-import "go-micro.dev/v5"
+type Service interface {
+	Name() string
+	Run() error
+}
 
 var (
-	DefaultService micro.Service
+	DefaultService Service
 )
 
 // SetupService configures the service
-func SetupService(service micro.Service) {
+func SetupService(service Service) {
 	DefaultService = service
 }
 

@@ -100,6 +100,7 @@ func extractEndpoint(method reflect.Method) *registry.Endpoint {
 
 	ep := &registry.Endpoint{
 		Name:     method.Name,
+		Handler:  "rpc",
 		Request:  request,
 		Response: response,
 		Metadata: make(map[string]string),

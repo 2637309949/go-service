@@ -15,10 +15,11 @@
 // Original source: github.com/micro/go-micro/v3/api/handler/rpc/rpc.go
 
 // Package rpc is a go-micro rpc
-package handler
+package rpc
 
 import (
 	"apigate/api"
+	"apigate/handler"
 	bts "bytes"
 	"encoding/json"
 	"net/http"
@@ -54,8 +55,7 @@ var (
 )
 
 type rpcHandler struct {
-	opts Options
-	s    *api.Service
+	opts handler.Options
 }
 
 // see https://stackoverflow.com/questions/28595664/how-to-stop-json-marshal-from-escaping-and/28596225
@@ -68,7 +68,7 @@ func jsonMarshal(t interface{}) ([]byte, error) {
 }
 
 func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	bsize := DefaultMaxRecvSize
+	bsize := handler.DefaultMaxRecvSize
 	if h.opts.MaxRecvSize > 0 {
 		bsize = h.opts.MaxRecvSize
 	}
@@ -77,14 +77,23 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	// try get service from router
-	service, err := h.opts.Router.Route(r)
-	if err != nil {
-		writeError(w, r, errors.InternalServerError("go.micro.api", "%s", err.Error()))
+	var service *api.Service
+	if h.opts.Service != nil {
+		service = h.opts.Service
+	} else if h.opts.Router != nil {
+		s, err := h.opts.Router.Route(h.opts.ApiBase, r)
+		if err != nil {
+			writeError(w, r, errors.InternalServerError("go.micro.api", "%s", err.Error()))
+			return
+		}
+		service = s
+	} else {
+		// we have no way of routing the request
+		writeError(w, r, errors.InternalServerError("go.micro.api", "no route found"))
 		return
 	}
-	c := h.opts.Client
 
+	c := h.opts.Client
 	ct := r.Header.Get("Content-Type")
 
 	// Strip charset from Content-Type (like `application/json; charset=UTF-8`)
@@ -314,17 +323,9 @@ func writeResponse(w http.ResponseWriter, r *http.Request, rsp []byte, ct string
 	}
 }
 
-func NewHandler(opts ...Option) Handler {
-	options := NewOptions(opts...)
+func NewHandler(opts ...handler.Option) handler.Handler {
+	options := handler.NewOptions(opts...)
 	return &rpcHandler{
 		opts: options,
-	}
-}
-
-func WithService(s *api.Service, opts ...Option) Handler {
-	options := NewOptions(opts...)
-	return &rpcHandler{
-		opts: options,
-		s:    s,
 	}
 }

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"comm/logger"
@@ -17,7 +16,7 @@ func loggerHandler(h server.HandlerFunc) server.HandlerFunc {
 		fields := map[string]interface{}{"invoke": req.Endpoint()}
 		if md, ok := metadata.FromContext(ctx); ok {
 			if v, ok := md["Remote"]; ok {
-				fields["Remote"] = v
+				fields["remote"] = v
 			}
 		}
 		logger.WithFields(fields).Info("")

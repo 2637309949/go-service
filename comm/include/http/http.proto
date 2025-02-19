@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package http;
+
+option go_package = "net/http;http";
+
+message ResponseWriter {
+}
+
+message Request {
+}

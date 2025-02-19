@@ -1,0 +1,20 @@
+@echo off
+setlocal enabledelayedexpansion
+
+set GOPATH=%GOPATH%
+set PATH=%PATH%;%GOPATH%\bin
+
+:: 设置绝对路径
+set PROTO_DIR=%CD%\..\..\proto\web\fileupload
+set INCLUDE_DIR=%CD%\..\..\comm\include
+
+for %%F in (%PROTO_DIR%\*.proto) do (
+    echo %%F
+    protoc -I%INCLUDE_DIR% --plugin=protoc-gen-web=%GOPATH%\bin\protoc-gen-micro.exe --proto_path=%CD%\..\.. --web_out=plugins=web:%PROTO_DIR% %%F
+)
+:: 移除 ,omitempty
+for %%F in (%PROTO_DIR%\*.go) do (
+    powershell -Command "(Get-Content -Path '%%F') -replace ',omitempty', '' | Set-Content -Path '%%F'"
+)
+
+endlocal

@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "/;web/fileupload";
+
+import "google/api/annotations.proto";
+import "http/http.proto";
+
+service FileUploadService {
+	rpc Upload (http.ResponseWriter) returns (http.Request) {
+		option (google.api.http) = {
+			post: "/upload" // expose httpApi
+			authorization: false
+			body: "*"
+		};
+	}
+}

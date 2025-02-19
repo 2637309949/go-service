@@ -10,7 +10,6 @@ import (
 
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/registry/cache"
-	"go-micro.dev/v5/server"
 )
 
 // router is the default router
@@ -55,13 +54,13 @@ func (r *registryRouter) Deregister(ep *api.Endpoint) error {
 	return nil
 }
 
-func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
+func (r *registryRouter) Route(apiBase string, req *http.Request) (*api.Service, error) {
 	if r.isClosed() {
 		return nil, errors.New("router closed")
 	}
 
 	// resolve service
-	rp := r.resolver.Resolve(req)
+	rp := r.resolver.Resolve(apiBase, req)
 	if len(rp.Name) == 0 {
 		return nil, errors.New("error during resolve: service not resolved")
 	}
@@ -112,10 +111,8 @@ func (r *registryRouter) auth(req *http.Request, rp *Endpoint) error {
 
 func (r *registryRouter) match(rp *Endpoint, services []*registry.Service) (*api.Service, error) {
 	sv := api.Service{
-		Name: rp.Name,
-		Endpoint: &api.Endpoint{
-			Handler: "rpc",
-		},
+		Name:     rp.Name,
+		Endpoint: &api.Endpoint{},
 		Services: services,
 	}
 
@@ -126,30 +123,30 @@ func (r *registryRouter) match(rp *Endpoint, services []*registry.Service) (*api
 		service := services[i]
 		for j := range service.Endpoints {
 			endpoint := service.Endpoints[j]
-			desc := server.Decode(endpoint.Metadata)
-			if desc == nil {
+			endpoint.Path = path.Clean(endpoint.Path)
+
+			if len(endpoint.Path) == 0 {
 				continue
 			}
 
-			desc.Path = path.Clean(desc.Path)
-			if len(desc.Path) == 0 {
+			if endpoint.Method != rp.Method || endpoint.Path != rp.Path {
 				continue
 			}
 
-			if desc.Method != rp.Method || desc.Path != rp.Path {
-				continue
-			}
-
-			if desc.Authorization {
+			if endpoint.Authorization {
 				authorization = true
 			}
 
 			if len(scope) == 0 {
-				scope = desc.Scope
+				scope = endpoint.Scope
 			}
 
 			if len(sv.Endpoint.Name) == 0 {
-				sv.Endpoint.Name = desc.Name
+				sv.Endpoint.Name = endpoint.Name
+			}
+
+			if len(sv.Endpoint.Handler) == 0 {
+				sv.Endpoint.Handler = endpoint.Handler
 			}
 
 			sv.Services = append(sv.Services, service)
@@ -173,7 +170,7 @@ func newRouter(opts ...router.Option) *registryRouter {
 		exit:     make(chan bool),
 		opts:     options,
 		rc:       cache.New(options.Registry),
-		resolver: NewResolver(options.ApiBase),
+		resolver: NewResolver(),
 	}
 	return r
 }

@@ -2,6 +2,7 @@ package web
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -87,8 +88,9 @@ func (s *service) genSrv() *registry.Service {
 	}
 
 	return &registry.Service{
-		Name:    s.opts.Name,
-		Version: s.opts.Version,
+		Name:      s.opts.Name,
+		Version:   s.opts.Version,
+		Endpoints: s.opts.Endpoints,
 		Nodes: []*registry.Node{{
 			Id:       s.opts.Id,
 			Address:  net.JoinHostPort(addr, port),
@@ -302,6 +304,10 @@ func (s *service) stop() error {
 	return <-ch
 }
 
+func (s *service) Name() string {
+	return s.opts.Name
+}
+
 func (s *service) Client() *http.Client {
 	rt := mhttp.NewRoundTripper(
 		mhttp.WithRegistry(s.opts.Registry),
@@ -315,7 +321,7 @@ func (s *service) Handle(pattern string, handler http.Handler) {
 	var seen bool
 	s.RLock()
 	for _, ep := range s.srv.Endpoints {
-		if ep.Name == pattern {
+		if ep.Path == pattern {
 			seen = true
 			break
 		}
@@ -326,7 +332,11 @@ func (s *service) Handle(pattern string, handler http.Handler) {
 	if !seen {
 		s.Lock()
 		s.srv.Endpoints = append(s.srv.Endpoints, &registry.Endpoint{
-			Name: pattern,
+			Name:          pattern,
+			Path:          pattern,
+			Handler:       "web",
+			Authorization: false,
+			Scope:         "",
 		})
 		s.Unlock()
 	}
@@ -339,7 +349,7 @@ func (s *service) Handle(pattern string, handler http.Handler) {
 	}
 
 	// register the handler
-	s.mux.Handle(pattern, handler)
+	s.mux.Handle(fmt.Sprintf("/%s%s", s.Name(), pattern), handler)
 }
 
 func (s *service) HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
@@ -347,7 +357,7 @@ func (s *service) HandleFunc(pattern string, handler func(http.ResponseWriter, *
 
 	s.RLock()
 	for _, ep := range s.srv.Endpoints {
-		if ep.Name == pattern {
+		if ep.Path == pattern {
 			seen = true
 			break
 		}
@@ -357,7 +367,11 @@ func (s *service) HandleFunc(pattern string, handler func(http.ResponseWriter, *
 	if !seen {
 		s.Lock()
 		s.srv.Endpoints = append(s.srv.Endpoints, &registry.Endpoint{
-			Name: pattern,
+			Name:          pattern,
+			Path:          pattern,
+			Handler:       "web",
+			Authorization: false,
+			Scope:         "",
 		})
 		s.Unlock()
 	}
@@ -369,7 +383,7 @@ func (s *service) HandleFunc(pattern string, handler func(http.ResponseWriter, *
 		s.Unlock()
 	}
 
-	s.mux.HandleFunc(pattern, handler)
+	s.mux.HandleFunc(fmt.Sprintf("/%s%s", s.Name(), pattern), handler)
 }
 
 func (s *service) Init(opts ...Option) error {
@@ -444,7 +458,7 @@ func (s *service) Init(opts ...Option) error {
 
 	s.Lock()
 	srv := s.genSrv()
-	srv.Endpoints = s.srv.Endpoints
+	srv.Endpoints = append(s.srv.Endpoints, s.opts.Endpoints...)
 	s.srv = srv
 	s.Unlock()
 

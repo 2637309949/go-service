@@ -359,7 +359,9 @@ message HttpRule {
   // not contain an `additional_bindings` field themselves (that is,
   // the nesting may only be one level deep).
   repeated HttpRule additional_bindings = 11;
+  // Authorization userinfo
   bool authorization = 13;
+  // Scope for authorization check
   string scope = 14;
 }
 

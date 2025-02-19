@@ -19,10 +19,10 @@ var corsMiddle = cors.New(cors.Config{
 })
 
 func resolverMiddle(apiBase string) gin.HandlerFunc {
-	resolver := registry.NewResolver(apiBase)
+	resolver := registry.NewResolver()
 	return func(cx *gin.Context) {
 		req := cx.Request
-		endpoint := resolver.Resolve(req)
+		endpoint := resolver.Resolve(apiBase, req)
 
 		ctx := ctx.FromRequest(req)
 		ctx = context.WithValue(ctx, registry.Endpoint{}, *endpoint)

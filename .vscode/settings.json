@@ -1,0 +1,9 @@
+{
+    "protoc": {
+        "path": "C:\\Users\\Doubl\\go\\bin\\protoc.exe",
+        "options": [
+            "--proto_path=../",
+            "-I../comm/include"
+        ]
+    }
+}
