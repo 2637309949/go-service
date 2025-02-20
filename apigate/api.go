@@ -6,6 +6,7 @@ import (
 	"apigate/handler/rpc"
 	"apigate/handler/web"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -40,6 +41,8 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	md, _ := metadata.FromContext(r.Context())
+	fmt.Printf("-----------%+v\n", md)
 	handler := defaultHandler
 	if len(service.Endpoint.Handler) > 0 {
 		handler = service.Endpoint.Handler

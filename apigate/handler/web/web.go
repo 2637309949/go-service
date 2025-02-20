@@ -15,6 +15,7 @@ import (
 
 	"apigate/handler"
 
+	"go-micro.dev/v5/metadata"
 	"go-micro.dev/v5/selector"
 )
 
@@ -47,6 +48,12 @@ func (wh *webHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if isWebSocket(r) {
 		wh.serveWebSocket(rp.Host, w, r)
 		return
+	}
+
+	if md, ok := metadata.FromContext(r.Context()); ok {
+		for k, v := range md {
+			r.Header.Set(k, v)
+		}
 	}
 
 	nr := r.Clone(r.Context())

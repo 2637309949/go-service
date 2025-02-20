@@ -148,3 +148,8 @@ func HandleSignal(b bool) web.Option {
 func Logger(l logger.Logger) web.Option {
 	return web.Logger(l)
 }
+
+// Adds a handler Wrapper to a list of options passed into the server.
+func WrapHandler(w web.HandlerWrapper) web.Option {
+	return web.WrapHandler(w)
+}

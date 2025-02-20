@@ -38,8 +38,11 @@ func NewService(opts ...web.Option) web.Service {
 		}
 	})
 	opts = append(opts, Registry(registry))
+	opts = append(opts, WrapHandler(NewTracerWrapper(nil)))
 	opts = append(opts, Version("latest"))
 	opts = append(opts, Context(ctx))
+	opts = append(opts, WrapHandler(loggerWrapper(logger.DefaultLogger)))
+	opts = append(opts, WrapHandler(loggerHandler))
 	service := &service{web.NewService(
 		opts...,
 	)}

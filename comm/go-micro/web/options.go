@@ -22,6 +22,8 @@ type Options struct {
 
 	Endpoints []*registry.Endpoint
 
+	HdlrWrappers []HandlerWrapper
+
 	Registry registry.Registry
 
 	// Alternative Options
@@ -283,5 +285,12 @@ func Logger(l logger.Logger) Option {
 func Endpoint(e *registry.Endpoint) Option {
 	return func(o *Options) {
 		o.Endpoints = append(o.Endpoints, e)
+	}
+}
+
+// Adds a handler Wrapper to a list of options passed into the server.
+func WrapHandler(w HandlerWrapper) Option {
+	return func(o *Options) {
+		o.HdlrWrappers = append(o.HdlrWrappers, w)
 	}
 }

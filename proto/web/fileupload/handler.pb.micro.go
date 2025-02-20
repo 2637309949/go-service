@@ -14,11 +14,14 @@ import (
 import (
 	context "context"
 	client "go-micro.dev/v5/client"
+	metadata "go-micro.dev/v5/metadata"
 	registry "go-micro.dev/v5/registry"
 	server "go-micro.dev/v5/server"
 	wb "go-micro.dev/v5/web"
 	httputil "net/http/httputil"
+	textproto "net/textproto"
 	url "net/url"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -105,6 +108,18 @@ func RegisterFileUploadServiceHandler(s wb.Service, hdlr FileUploadServiceHandle
 	s.Init(opts...)
 	s.HandleFunc("/upload", func(w http.ResponseWriter, r *http.Request) {
 		cx := r.Context()
+		md, ok := metadata.FromContext(cx)
+		if !ok {
+			md = make(metadata.Metadata)
+		}
+		for k, v := range r.Header {
+			md[textproto.CanonicalMIMEHeaderKey(k)] = strings.Join(v, ", ")
+		}
+		md["Host"] = r.Host
+		if r.URL != nil {
+			md["URL"] = r.URL.String()
+		}
+		cx = metadata.NewContext(cx, md)
 		hdlr.Upload(cx, w, r)
 	})
 }

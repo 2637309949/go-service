@@ -2,7 +2,6 @@ package main
 
 import (
 	"apigate/router/registry"
-	"apigate/util/ctx"
 	"context"
 	"fmt"
 
@@ -24,7 +23,7 @@ func resolverMiddle(apiBase string) gin.HandlerFunc {
 		req := cx.Request
 		endpoint := resolver.Resolve(apiBase, req)
 
-		ctx := ctx.FromRequest(req)
+		ctx := req.Context()
 		ctx = context.WithValue(ctx, registry.Endpoint{}, *endpoint)
 
 		*req = *req.Clone(ctx)

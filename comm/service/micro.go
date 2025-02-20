@@ -47,17 +47,17 @@ func NewService(opts ...micro.Option) micro.Service {
 			registryAddress,
 		}
 	})
-	opts = append(opts, micro.Registry(registry))
-	opts = append(opts, micro.WrapClient(opentracing.NewClientWrapper(nil)))
-	opts = append(opts, micro.WrapHandler(opentracing.NewHandlerWrapper(nil)))
-	opts = append(opts, micro.WrapSubscriber(opentracing.NewSubscriberWrapper(nil)))
-	opts = append(opts, micro.RegisterTTL(time.Second*90))
-	opts = append(opts, micro.RegisterInterval(time.Second*30))
-	opts = append(opts, micro.Version("latest"))
-	opts = append(opts, micro.Context(ctx))
-	opts = append(opts, micro.WrapHandler(loggerWrapper(logger.DefaultLogger)))
-	opts = append(opts, micro.WrapHandler(loggerHandler))
-	opts = append(opts, micro.WrapHandler(validator.NewHandlerWrapper()))
+	opts = append(opts, Registry(registry))
+	opts = append(opts, WrapClient(opentracing.NewClientWrapper(nil)))
+	opts = append(opts, WrapHandler(opentracing.NewHandlerWrapper(nil)))
+	opts = append(opts, WrapSubscriber(opentracing.NewSubscriberWrapper(nil)))
+	opts = append(opts, RegisterTTL(time.Second*90))
+	opts = append(opts, RegisterInterval(time.Second*30))
+	opts = append(opts, Version("latest"))
+	opts = append(opts, Context(ctx))
+	opts = append(opts, WrapHandler(loggerWrapper(logger.DefaultLogger)))
+	opts = append(opts, WrapHandler(loggerHandler))
+	opts = append(opts, WrapHandler(validator.NewHandlerWrapper()))
 	service := &service{micro.NewService(
 		opts...,
 	)}

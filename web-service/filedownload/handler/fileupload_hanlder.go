@@ -1,11 +1,16 @@
 package handler
 
 import (
+	"comm/logger"
+	"comm/mark"
 	"context"
-	"fmt"
 	"net/http"
 )
 
 func (h *Handler) Download(ctx context.Context, w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "hello")
+	var timemark mark.TimeMark
+	logger := logger.Extract(ctx)
+	defer timemark.Init(ctx, "Download")()
+	timemark.Mark("Download")
+	logger.Info("Download")
 }

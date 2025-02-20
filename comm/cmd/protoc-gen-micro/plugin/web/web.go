@@ -15,13 +15,16 @@ import (
 // Paths for packages used by code generated in this file,
 // relative to the import_prefix of the generator.Generator.
 const (
-	apiPkgPath      = "go-micro.dev/v5/registry"
-	contextPkgPath  = "context"
-	clientPkgPath   = "go-micro.dev/v5/client"
-	serverPkgPath   = "go-micro.dev/v5/server"
-	webPkgPath      = "go-micro.dev/v5/web"
-	httputilPkgPath = "net/http/httputil"
-	urlPkgPath      = "net/url"
+	apiPkgPath       = "go-micro.dev/v5/registry"
+	contextPkgPath   = "context"
+	clientPkgPath    = "go-micro.dev/v5/client"
+	serverPkgPath    = "go-micro.dev/v5/server"
+	webPkgPath       = "go-micro.dev/v5/web"
+	httputilPkgPath  = "net/http/httputil"
+	urlPkgPath       = "net/url"
+	metadataPkgPath  = "go-micro.dev/v5/metadata"
+	textprotoPkgPath = "net/textproto"
+	stringsPkgPath   = "strings"
 )
 
 func init() {
@@ -43,14 +46,17 @@ func (g *web) Name() string {
 // They may vary from the final path component of the import path
 // if the name is used by other packages.
 var (
-	apiPkg      string
-	contextPkg  string
-	clientPkg   string
-	serverPkg   string
-	webPkg      string
-	httputilPkg string
-	urlPkg      string
-	pkgImports  map[generator.GoPackageName]bool
+	apiPkg       string
+	contextPkg   string
+	clientPkg    string
+	serverPkg    string
+	webPkg       string
+	httputilPkg  string
+	urlPkg       string
+	metadataPkg  string
+	textprotoPkg string
+	stringsPkg   string
+	pkgImports   map[generator.GoPackageName]bool
 )
 
 // Init initializes the plugin.
@@ -63,6 +69,9 @@ func (g *web) Init(gen *generator.Generator) {
 	webPkg = generator.RegisterUniquePackageName("wb", nil)
 	httputilPkg = generator.RegisterUniquePackageName("httputil", nil)
 	urlPkg = generator.RegisterUniquePackageName("url", nil)
+	metadataPkg = generator.RegisterUniquePackageName("metadata", nil)
+	textprotoPkg = generator.RegisterUniquePackageName("textproto", nil)
+	stringsPkg = generator.RegisterUniquePackageName("strings", nil)
 }
 
 // Given a type name defined in a .proto, return its object.
@@ -110,6 +119,9 @@ func (g *web) GenerateImports(file *generator.FileDescriptor, imports map[genera
 	g.P(webPkg, " ", strconv.Quote(path.Join(g.gen.ImportPrefix, webPkgPath)))
 	g.P(urlPkg, " ", strconv.Quote(path.Join(g.gen.ImportPrefix, urlPkgPath)))
 	g.P(httputilPkg, " ", strconv.Quote(path.Join(g.gen.ImportPrefix, httputilPkgPath)))
+	g.P(metadataPkg, " ", strconv.Quote(path.Join(g.gen.ImportPrefix, metadataPkgPath)))
+	g.P(textprotoPkg, " ", strconv.Quote(path.Join(g.gen.ImportPrefix, textprotoPkgPath)))
+	g.P(stringsPkg, " ", strconv.Quote(path.Join(g.gen.ImportPrefix, stringsPkgPath)))
 	g.P(")")
 	g.P()
 
@@ -269,6 +281,18 @@ func (g *web) generateService(file *generator.FileDescriptor, service *pb.Servic
 			}
 			g.P(`s.HandleFunc("`, path, `", func(w http.ResponseWriter, r *http.Request) {`)
 			g.P("cx := r.Context()")
+			g.P(`md, ok := `, metadataPkg, `.FromContext(cx)`)
+			g.P("if !ok {")
+			g.P(`md = make(`, metadataPkg, `.Metadata)`)
+			g.P("}")
+			g.P("for k, v := range r.Header {")
+			g.P(`md[`, textprotoPkg, `.CanonicalMIMEHeaderKey(k)] = `, stringsPkg, `.Join(v, ", ")`)
+			g.P("}")
+			g.P(`md["Host"] = r.Host`)
+			g.P(`if r.URL != nil {`)
+			g.P(`md["URL"] = r.URL.String()`)
+			g.P("}")
+			g.P(`cx = `, metadataPkg, `.NewContext(cx, md)`)
 			g.P("hdlr.", methName, "(cx, w, r)")
 			g.P("})")
 		}

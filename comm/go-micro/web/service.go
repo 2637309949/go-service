@@ -348,6 +348,13 @@ func (s *service) Handle(pattern string, handler http.Handler) {
 		s.Unlock()
 	}
 
+	// execute the wrapper for it
+	hsp := handler.ServeHTTP
+	for i := len(s.opts.HdlrWrappers); i > 0; i-- {
+		hsp = s.opts.HdlrWrappers[i-1](hsp)
+	}
+
+	handler = &serve{hsp}
 	// register the handler
 	s.mux.Handle(fmt.Sprintf("/%s%s", s.Name(), pattern), handler)
 }
@@ -381,6 +388,11 @@ func (s *service) HandleFunc(pattern string, handler func(http.ResponseWriter, *
 		s.Lock()
 		s.static = false
 		s.Unlock()
+	}
+
+	// execute the wrapper for it
+	for i := len(s.opts.HdlrWrappers); i > 0; i-- {
+		handler = s.opts.HdlrWrappers[i-1](handler)
 	}
 
 	s.mux.HandleFunc(fmt.Sprintf("/%s%s", s.Name(), pattern), handler)
@@ -599,4 +611,12 @@ func (s *service) listen(network, addr string) (net.Listener, error) {
 	}
 
 	return listener, nil
+}
+
+type serve struct {
+	h func(w http.ResponseWriter, r *http.Request)
+}
+
+func (s *serve) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.h(w, r)
 }

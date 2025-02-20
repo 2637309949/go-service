@@ -137,7 +137,7 @@ func (l *defaultLogger) Log(level logger.Level, v ...interface{}) {
 	colored := ""
 	for _, k := range keys {
 		metadata += fmt.Sprintf(" %s=%v", k, fields[k])
-		if k == "invoke" {
+		if k == "invoke" || k == "method" {
 			color = "\033[32m"
 			colored = "\033[0m"
 		}
@@ -185,7 +185,7 @@ func (l *defaultLogger) Logf(level logger.Level, format string, v ...interface{}
 	colored := ""
 	for _, k := range keys {
 		metadata += fmt.Sprintf(" %s=%v", k, fields[k])
-		if k == "invoke" {
+		if k == "invoke" || k == "method" {
 			color = "\033[32m"
 			colored = "\033[0m"
 		}
