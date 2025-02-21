@@ -77,14 +77,14 @@ type MicroServiceHandler interface {
 	Home(context.Context, *MicroFilter, *Micro) error
 }
 
-func RegisterMicroServiceHandler(s server.Server, hdlr MicroServiceHandler, opts ...server.HandlerOption) error {
+func RegisterMicroServiceProxy(s server.Server, opts ...server.HandlerOption) error {
 	type microService interface {
 		Home(ctx context.Context, in *MicroFilter, out *Micro) error
 	}
 	type MicroService struct {
 		microService
 	}
-	h := &microServiceHandler{hdlr}
+	h := &microServiceHandler{}
 	opts = append(opts, server.WithEndpoint(&registry.Endpoint{
 		Authorization: false,
 		Scope:         "micro",
@@ -153,14 +153,14 @@ type MeiZuServiceHandler interface {
 	ListWeather(context.Context, *WeatherFilter, *WeatherList) error
 }
 
-func RegisterMeiZuServiceHandler(s server.Server, hdlr MeiZuServiceHandler, opts ...server.HandlerOption) error {
+func RegisterMeiZuServiceProxy(s server.Server, opts ...server.HandlerOption) error {
 	type meiZuService interface {
 		ListWeather(ctx context.Context, in *WeatherFilter, out *WeatherList) error
 	}
 	type MeiZuService struct {
 		meiZuService
 	}
-	h := &meiZuServiceHandler{hdlr}
+	h := &meiZuServiceHandler{}
 	opts = append(opts, server.WithEndpoint(&registry.Endpoint{
 		Authorization: false,
 		Scope:         "meizu",

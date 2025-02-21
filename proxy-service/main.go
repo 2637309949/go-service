@@ -3,7 +3,6 @@ package main
 import (
 	"comm/service"
 	pbProxy "proto/proxy"
-	"proxy/handler"
 
 	"github.com/micro/plugins/v5/proxy/http"
 )
@@ -21,8 +20,7 @@ func main() {
 		service.Name("proxy"),
 		service.Router(r),
 	)
-	h := handler.Handler{}
-	pbProxy.RegisterMicroServiceHandler(service.Server(), &h)
-	pbProxy.RegisterMeiZuServiceHandler(service.Server(), &h)
+	pbProxy.RegisterMicroServiceProxy(service.Server())
+	pbProxy.RegisterMeiZuServiceProxy(service.Server())
 	service.Run()
 }

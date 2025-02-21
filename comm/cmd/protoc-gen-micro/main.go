@@ -60,6 +60,7 @@ import (
 
 	"github.com/go-micro/generator/cmd/protoc-gen-micro/generator"
 	_ "github.com/go-micro/generator/cmd/protoc-gen-micro/plugin/micro"
+	_ "github.com/go-micro/generator/cmd/protoc-gen-micro/plugin/proxy"
 	_ "github.com/go-micro/generator/cmd/protoc-gen-micro/plugin/web"
 	"google.golang.org/protobuf/proto"
 )
