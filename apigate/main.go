@@ -46,9 +46,9 @@ func main() {
 	opts = append(opts, handler.WithHandler(web.NewHandler(opts...)))
 	hd := handler.NewHandler(opts...)
 	gin.DefaultWriter = io.Discard
-
 	logger.Infof("Starting server %s", addr)
 	r := gin.Default()
+	r.Use(util.LoggerWithConfig(gin.LoggerConfig{}))
 	r.Use(util.CorsMiddle)
 	r.Any("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
