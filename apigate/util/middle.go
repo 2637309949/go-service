@@ -1,4 +1,4 @@
-package main
+package util
 
 import (
 	"apigate/router/registry"
@@ -11,13 +11,13 @@ import (
 	ogo "github.com/opentracing/opentracing-go"
 )
 
-var corsMiddle = cors.New(cors.Config{
+var CorsMiddle = cors.New(cors.Config{
 	AllowAllOrigins: true,
 	AllowMethods:    []string{"POST", "PATCH", "GET", "OPTIONS", "PUT", "DELETE"},
 	AllowHeaders:    []string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "Micro-Namespace"},
 })
 
-func resolverMiddle(apiBase string) gin.HandlerFunc {
+func ResolverMiddle(apiBase string) gin.HandlerFunc {
 	resolver := registry.NewResolver()
 	return func(cx *gin.Context) {
 		req := cx.Request
@@ -31,7 +31,7 @@ func resolverMiddle(apiBase string) gin.HandlerFunc {
 	}
 }
 
-func tracerMiddle(tracer ogo.Tracer) gin.HandlerFunc {
+func TracerMiddle(tracer ogo.Tracer) gin.HandlerFunc {
 	return func(cx *gin.Context) {
 		name := "apigate"
 		v := cx.Request.Context().Value(registry.Endpoint{})

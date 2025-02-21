@@ -5,6 +5,7 @@ import (
 	"apigate/handler/rpc"
 	"apigate/handler/web"
 	"apigate/router"
+	"apigate/router/auth"
 	"apigate/router/registry"
 	"apigate/util"
 	"comm/config"
@@ -36,7 +37,7 @@ func main() {
 	opts = append(opts, handler.WithApiBase(apiBase))
 	opts = append(opts, handler.WithRouter(
 		registry.NewRouter(
-			router.WithAuth(new(jwt)),
+			router.WithAuth(auth.NewJWT()),
 			router.WithRegistry(consulRegistry),
 		),
 	))
@@ -48,15 +49,15 @@ func main() {
 
 	logger.Infof("Starting server %s", addr)
 	r := gin.Default()
-	r.Use(corsMiddle)
+	r.Use(util.CorsMiddle)
 	r.Any("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"version": "5.1",
 		})
 	})
 	r.GET("/favicon.ico", func(c *gin.Context) {})
-	r.Use(resolverMiddle(apiBase))
-	r.Use(tracerMiddle(tracer))
+	r.Use(util.ResolverMiddle(apiBase))
+	r.Use(util.TracerMiddle(tracer))
 	r.NoRoute(func(c *gin.Context) {
 		hd.ServeHTTP(c.Writer, c.Request)
 	})

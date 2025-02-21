@@ -1,7 +1,6 @@
-package main
+package auth
 
 import (
-	"apigate/router/auth"
 	"errors"
 	"time"
 
@@ -27,8 +26,8 @@ type authClaims struct {
 // also cache
 type jwt struct{}
 
-func (a *jwt) Generate(acc *auth.Account, opt ...auth.Option) (*auth.Token, error) {
-	opts := auth.Options{}
+func (a *jwt) Generate(acc *Account, opt ...Option) (*Token, error) {
+	opts := Options{}
 	secret := ""
 	for _, o := range opt {
 		o(&opts)
@@ -64,7 +63,7 @@ func (a *jwt) Generate(acc *auth.Account, opt ...auth.Option) (*auth.Token, erro
 	}
 
 	// return the token
-	return &auth.Token{
+	return &Token{
 		AccessToken:  tok,
 		RefreshToken: tok,
 		Expiry:       expiry,
@@ -72,9 +71,9 @@ func (a *jwt) Generate(acc *auth.Account, opt ...auth.Option) (*auth.Token, erro
 	}, nil
 }
 
-func (a *jwt) Inspect(token string, opt ...auth.Option) (*auth.Account, error) {
-	opts := auth.Options{}
-	acc := auth.Account{}
+func (a *jwt) Inspect(token string, opt ...Option) (*Account, error) {
+	opts := Options{}
+	acc := Account{}
 	for _, o := range opt {
 		o(&opts)
 	}
@@ -89,8 +88,8 @@ func (a *jwt) Inspect(token string, opt ...auth.Option) (*auth.Account, error) {
 	return &acc, nil
 }
 
-func (a *jwt) Verify(acc *auth.Account, scope string, opt ...auth.Option) error {
-	opts := auth.Options{}
+func (a *jwt) Verify(acc *Account, scope string, opt ...Option) error {
+	opts := Options{}
 	for _, o := range opt {
 		o(&opts)
 	}
@@ -104,9 +103,9 @@ func (a *jwt) Verify(acc *auth.Account, scope string, opt ...auth.Option) error 
 	return nil
 }
 
-func (a *jwt) Refresh(token string, opt ...auth.Option) (*auth.Token, error) {
-	opts := auth.Options{}
-	acc := auth.Token{}
+func (a *jwt) Refresh(token string, opt ...Option) (*Token, error) {
+	opts := Options{}
+	acc := Token{}
 	for _, o := range opt {
 		o(&opts)
 	}
@@ -118,4 +117,8 @@ func (a *jwt) Refresh(token string, opt ...auth.Option) (*auth.Token, error) {
 
 	}
 	return &acc, nil
+}
+
+func NewJWT() Auth {
+	return &jwt{}
 }
