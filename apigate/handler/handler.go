@@ -1,24 +1,15 @@
-// Copyright 2020 Asim Aslam
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// Original source: github.com/micro/go-micro/v3/api/handler/handler.go
-
-// Package handler provides http handlers
 package handler
 
 import (
+	"apigate/api"
+	"apigate/util"
 	"net/http"
+
+	"go-micro.dev/v5/errors"
+)
+
+var (
+	defaultHandler = "rpc"
 )
 
 // Handler represents a HTTP handler that manages a request
@@ -27,4 +18,50 @@ type Handler interface {
 	ServeHTTP(w http.ResponseWriter, r *http.Request)
 	// name of handler
 	String() string
+}
+
+type h struct {
+	opts Options
+}
+
+func (a *h) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var service *api.Service
+
+	if a.opts.Service != nil {
+		service = a.opts.Service
+	} else if a.opts.Router != nil {
+		s, err := a.opts.Router.Route(a.opts.ApiBase, r)
+		if err != nil {
+			util.WriteError(w, r, errors.InternalServerError("go.micro.api", "%s", err.Error()))
+			return
+		}
+		service = s
+	} else {
+		// we have no way of routing the request
+		util.WriteError(w, r, errors.InternalServerError("go.micro.api", "no route found"))
+		return
+	}
+
+	handler := defaultHandler
+	if len(service.Endpoint.Handler) > 0 {
+		handler = service.Endpoint.Handler
+	}
+
+	if h, ok := a.opts.Handlers[handler]; ok {
+		h.ServeHTTP(w, r)
+		return
+	}
+
+	util.WriteError(w, r, errors.InternalServerError("go.micro.api", "no handler found"))
+}
+
+func (a *h) String() string {
+	return "handler"
+}
+
+func NewHandler(opts ...Option) Handler {
+	options := NewOptions(opts...)
+	return &h{
+		opts: options,
+	}
 }

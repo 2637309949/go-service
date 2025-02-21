@@ -2,6 +2,8 @@ package main
 
 import (
 	"apigate/handler"
+	"apigate/handler/rpc"
+	"apigate/handler/web"
 	"apigate/router"
 	"apigate/router/registry"
 	"apigate/util"
@@ -30,7 +32,6 @@ func main() {
 			consulAddress,
 		}
 	})
-
 	opts := []handler.Option{}
 	opts = append(opts, handler.WithApiBase(apiBase))
 	opts = append(opts, handler.WithRouter(
@@ -40,7 +41,9 @@ func main() {
 		),
 	))
 	opts = append(opts, handler.WithWrapCall(opentracing.NewCallWrapper(tracer)))
-	hd := NewHandler(opts...)
+	opts = append(opts, handler.WithHandler(rpc.NewHandler(opts...)))
+	opts = append(opts, handler.WithHandler(web.NewHandler(opts...)))
+	hd := handler.NewHandler(opts...)
 	gin.DefaultWriter = io.Discard
 
 	logger.Infof("Starting server %s", addr)

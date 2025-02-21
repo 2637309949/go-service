@@ -1,37 +1,17 @@
-// Copyright 2020 Asim Aslam
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     https://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
-// Original source: github.com/micro/go-micro/v3/api/handler/rpc/rpc.go
-
-// Package rpc is a go-micro rpc
 package rpc
 
 import (
 	"apigate/api"
 	"apigate/handler"
+	"apigate/util"
 	bts "bytes"
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"strings"
-
-	"apigate/util"
 
 	"go-micro.dev/v5/client"
 	"go-micro.dev/v5/codec/bytes"
 	"go-micro.dev/v5/errors"
-	"go-micro.dev/v5/logger"
 	"go-micro.dev/v5/metadata"
 )
 
@@ -54,10 +34,6 @@ var (
 	}
 )
 
-type rpcHandler struct {
-	opts handler.Options
-}
-
 // see https://stackoverflow.com/questions/28595664/how-to-stop-json-marshal-from-escaping-and/28596225
 func jsonMarshal(t interface{}) ([]byte, error) {
 	buffer := &bts.Buffer{}
@@ -65,6 +41,10 @@ func jsonMarshal(t interface{}) ([]byte, error) {
 	encoder.SetEscapeHTML(false)
 	err := encoder.Encode(t)
 	return bts.TrimRight(buffer.Bytes(), "\n"), err
+}
+
+type rpcHandler struct {
+	opts handler.Options
 }
 
 func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -83,13 +63,13 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else if h.opts.Router != nil {
 		s, err := h.opts.Router.Route(h.opts.ApiBase, r)
 		if err != nil {
-			writeError(w, r, errors.InternalServerError("go.micro.api", "%s", err.Error()))
+			util.WriteError(w, r, errors.InternalServerError("go.micro.api", "%s", err.Error()))
 			return
 		}
 		service = s
 	} else {
 		// we have no way of routing the request
-		writeError(w, r, errors.InternalServerError("go.micro.api", "no route found"))
+		util.WriteError(w, r, errors.InternalServerError("go.micro.api", "no route found"))
 		return
 	}
 
@@ -128,9 +108,9 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// walk the standard call path
 	// get payload
-	br, err := api.RequestPayload(r)
+	br, err := util.RequestPayload(r)
 	if err != nil {
-		writeError(w, r, err)
+		util.WriteError(w, r, err)
 		return
 	}
 
@@ -156,7 +136,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// make the call
 		var response bytes.Frame
 		if err := c.Call(cx, req, &response, callOpt...); err != nil {
-			writeError(w, r, err)
+			util.WriteError(w, r, err)
 			return
 		}
 		rsp = response.Data
@@ -184,7 +164,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		)
 		// make the call
 		if err := c.Call(cx, req, &response, callOpt...); err != nil {
-			writeError(w, r, err)
+			util.WriteError(w, r, err)
 			return
 		}
 
@@ -192,13 +172,13 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// see https://play.golang.org/p/oBNxUjVTzus
 		rsp, err = jsonMarshal(response)
 		if err != nil {
-			writeError(w, r, err)
+			util.WriteError(w, r, err)
 			return
 		}
 	}
 
 	// write the response
-	writeResponse(w, r, rsp, ct)
+	util.WriteResponse(w, r, rsp, ct)
 }
 
 func (rh *rpcHandler) String() string {
@@ -212,115 +192,6 @@ func hasCodec(ct string, codecs []string) bool {
 		}
 	}
 	return false
-}
-
-func writeError(w http.ResponseWriter, r *http.Request, err error) {
-	// response content type
-	w.Header().Set("Content-Type", "application/json")
-	traceID := ""
-	if md, ok := metadata.FromContext(r.Context()); ok {
-		traceID = md["Uber-Trace-Id"]
-		traceID = strings.Split(traceID, ":")[0]
-	}
-	// parse out the error code
-	ce := errors.Parse(err.Error())
-	switch ce.Code {
-	case 0:
-		ce.Code = 500
-		ce.Detail = "error during request: " + ce.Detail
-	}
-
-	// Set trailers
-	if strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
-		w.Header().Set("Trailer", "grpc-status")
-		w.Header().Set("Trailer", "grpc-message")
-		w.Header().Set("grpc-status", "13")
-		w.Header().Set("grpc-message", ce.Detail)
-	}
-
-	var data map[string]interface{}
-	json.Unmarshal([]byte(ce.Error()), &data)
-	delete(data, "id")
-	delete(data, "status")
-	if len(traceID) > 0 {
-		data["request_id"] = traceID
-	}
-	updated, err := json.Marshal(data)
-	if err != nil {
-		if logger.V(logger.ErrorLevel, logger.DefaultLogger) {
-			logger.Error(err)
-		}
-	}
-	w.WriteHeader(200)
-	_, err = w.Write(updated)
-	if err != nil {
-		if logger.V(logger.ErrorLevel, logger.DefaultLogger) {
-			logger.Error(err)
-		}
-	}
-}
-
-func writeResponse(w http.ResponseWriter, r *http.Request, rsp []byte, ct string) {
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", ct)
-
-	traceID := ""
-	if md, ok := metadata.FromContext(r.Context()); ok {
-		traceID = md["Uber-Trace-Id"]
-		traceID = strings.Split(traceID, ":")[0]
-	}
-
-	// Set trailers
-	if strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
-		w.Header().Set("Trailer", "grpc-status")
-		w.Header().Set("Trailer", "grpc-message")
-		w.Header().Set("grpc-status", "0")
-		w.Header().Set("grpc-message", "")
-	}
-
-	// write 204 status if rsp is nil
-	if len(rsp) == 0 {
-		w.WriteHeader(http.StatusNoContent)
-	}
-
-	v := map[string]interface{}{}
-	err := json.Unmarshal(rsp, &v)
-	if err != nil {
-		if logger.V(logger.ErrorLevel, logger.DefaultLogger) {
-			logger.Error(err)
-		}
-	}
-	if dataField, ok := v["data"]; ok {
-		if _, ok := dataField.([]interface{}); ok {
-			v["code"] = 200
-			if len(traceID) > 0 {
-				v["request_id"] = traceID
-			}
-		}
-	} else {
-		newRsp := make(map[string]interface{})
-		newRsp["data"] = v
-		newRsp["code"] = 200
-		if len(traceID) > 0 {
-			newRsp["request_id"] = traceID
-		}
-		v = newRsp
-	}
-	rsp, err = jsonMarshal(v)
-	if err != nil {
-		if logger.V(logger.ErrorLevel, logger.DefaultLogger) {
-			logger.Error(err)
-		}
-	}
-
-	// write response
-	w.Header().Set("Content-Length", strconv.Itoa(len(rsp)))
-	_, err = w.Write(rsp)
-	if err != nil {
-		if logger.V(logger.ErrorLevel, logger.DefaultLogger) {
-			logger.Error(err)
-		}
-	}
 }
 
 func NewHandler(opts ...handler.Option) handler.Handler {
