@@ -13,4 +13,5 @@ func (h *Handler) Download(ctx context.Context, w http.ResponseWriter, r *http.R
 	defer timemark.Init(ctx, "Download")()
 	timemark.Mark("Download")
 	logger.Info("Download")
+	w.Write([]byte(`{"hello": "world"}`))
 }

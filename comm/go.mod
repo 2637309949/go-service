@@ -3,6 +3,7 @@ module comm
 go 1.22.0
 
 replace (
+	github.com/micro/plugins/v5/broker/memory => ../comm/plugins/broker/memory
 	github.com/micro/plugins/v5/registry/consul => ../comm/plugins/registry/consul
 	github.com/micro/plugins/v5/source/consul => ../comm/plugins/source/consul
 	github.com/micro/plugins/v5/wrapper/trace/opentracing => ../comm/plugins/wrapper/trace/opentracing
@@ -11,6 +12,7 @@ replace (
 )
 
 require (
+	github.com/micro/plugins/v5/broker/memory v0.0.0-00010101000000-000000000000
 	github.com/micro/plugins/v5/registry/consul v0.0.0-00010101000000-000000000000
 	github.com/micro/plugins/v5/source/consul v0.0.0-00010101000000-000000000000
 	github.com/micro/plugins/v5/wrapper/trace/opentracing v0.0.0-00010101000000-000000000000
@@ -71,5 +73,6 @@ require (
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/jinzhu/gorm v1.9.16
 	github.com/opentracing/opentracing-go v1.2.0
+	github.com/satori/go.uuid v1.2.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 )

@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option go_package = "/;proxy";
+
+import "google/api/annotations.proto";
+import "proto/proxy/micro.proto";
+import "proto/proxy/meizu.proto";
+
+service MicroService {
+	rpc Home (MicroFilter) returns (Micro) {
+		option (google.api.http) = {
+			get: "/Home" // expose httpApi
+			authorization: false
+			scope: "micro"
+			body: "*"
+		};
+	}
+}
+
+service MeiZuService {
+	rpc ListWeather (WeatherFilter) returns (WeatherList) {
+		option (google.api.http) = {
+			get: "/ListWeather" // expose httpApi
+			authorization: false
+			scope: "meizu"
+			body: "*"
+		};
+	}
+}

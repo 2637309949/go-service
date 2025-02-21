@@ -26,7 +26,7 @@ import (
 	"strconv"
 	"strings"
 
-	"apigate/util/ctx"
+	"apigate/util"
 
 	"go-micro.dev/v5/client"
 	"go-micro.dev/v5/codec/bytes"
@@ -104,7 +104,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// delete some headers
 
 	// create context
-	cx := ctx.FromRequest(r)
+	cx := util.FromRequest(r)
 
 	// strip headers grpc doesn't like
 	md, _ := metadata.FromContext(cx)

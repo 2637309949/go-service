@@ -58,7 +58,6 @@ func (r *registryRouter) Route(apiBase string, req *http.Request) (*api.Service,
 	if r.isClosed() {
 		return nil, errors.New("router closed")
 	}
-
 	// resolve service
 	rp := r.resolver.Resolve(apiBase, req)
 	if len(rp.Name) == 0 {

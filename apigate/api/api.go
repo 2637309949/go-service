@@ -22,7 +22,7 @@ import (
 
 	jsonpatch "github.com/evanphx/json-patch/v5"
 
-	"apigate/util/qson"
+	"apigate/util"
 
 	"github.com/oxtoacart/bpool"
 	"go-micro.dev/v5/metadata"
@@ -144,7 +144,7 @@ func RequestPayload(r *http.Request) ([]byte, error) {
 	// get fields from url values
 	if len(r.URL.RawQuery) > 0 {
 		umd := make(map[string]interface{})
-		err = qson.Unmarshal(&umd, r.URL.RawQuery)
+		err = util.Unmarshal(&umd, r.URL.RawQuery)
 		if err != nil {
 			return nil, err
 		}

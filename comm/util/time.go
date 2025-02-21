@@ -10,7 +10,6 @@ const (
 )
 
 func Unix(t time.Time) int64 {
-	//CST存入 按照UTC取出 需要处理下
 	localtime := t.In(time.Local)
 	sec := localtime.Unix()
 	if sec < 0 {
@@ -19,7 +18,6 @@ func Unix(t time.Time) int64 {
 	return sec
 }
 
-// Time 时间戳转time
 func Time(sec int64) (t time.Time) {
 	if sec > 0 {
 		t = time.Unix(sec, 0)
@@ -173,16 +171,14 @@ func UnixTostr(timestamp int64) string {
 	return tm.Format("2006-01-02 15:04:05")
 }
 
-// GetLastDayOfMonth 获取本月最后一天
 func GetLastDayOfMonth(tTime time.Time) time.Time {
 	year, month, _ := tTime.Date()
-	if month == time.December { // 如果当前月份是12月
-		year++               // 年份加1
-		month = time.January // 月份变为1月（January）
+	if month == time.December {
+		year++
+		month = time.January
 	} else {
-		month++ // 否则，月份加1
+		month++
 	}
-	// 下个月1号
 	nextFirstDay := time.Date(year, month, 1, 0, 0, 0, 0, tTime.Location())
-	return nextFirstDay.AddDate(0, 0, -1) // 减去一天得到本月最后一天
+	return nextFirstDay.AddDate(0, 0, -1)
 }

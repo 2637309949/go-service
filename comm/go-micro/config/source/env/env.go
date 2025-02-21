@@ -1,7 +1,7 @@
 package env
 
 import (
-	"io"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -32,12 +32,13 @@ func (e *env) Read() (*source.ChangeSet, error) {
 	fh, err := os.Open(e.path)
 	if err == nil {
 		defer fh.Close()
-		b, err := io.ReadAll(fh)
+		fm, err := parse(fh)
 		if err != nil {
 			return nil, err
 		}
-		lines := strings.Split(string(b), "\n")
-		envs = append(envs, lines...)
+		for k, v := range fm {
+			envs = append(envs, fmt.Sprintf("%s=%s", k, v))
+		}
 	}
 
 	for _, env := range envs {

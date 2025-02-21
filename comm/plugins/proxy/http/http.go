@@ -4,10 +4,12 @@ package http
 import (
 	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
-	"path/filepath"
+	"path"
 	"strings"
 
 	"go-micro.dev/v5"
@@ -22,8 +24,6 @@ type Router struct {
 	// The http backend to call
 	Backend string
 
-	// first request
-	first bool
 	// rpc ep / http ep mapping
 	eps map[string]string
 }
@@ -33,7 +33,7 @@ type Resolver struct{}
 
 var (
 	// DefaultBackend is the default backend address.
-	DefaultBackend = "http://localhost:9090"
+	DefaultBackend = "http://localhost:8080"
 	// DefaultRouter is the default router.
 	DefaultRouter = &Router{}
 )
@@ -45,7 +45,7 @@ func (r *Resolver) Resolve(ep string) string {
 	// lowercase the whole thing
 	ep = strings.ToLower(ep)
 	// prefix with "/"
-	return filepath.Join("/", ep)
+	return path.Clean("/" + ep)
 }
 
 // set the nil things.
@@ -61,33 +61,48 @@ func (p *Router) setup() {
 	}
 }
 
+func (p *Router) SetBackend(bk string) {
+	p.Backend = bk
+}
+
 // Endpoint returns the http endpoint for an rpc endpoint.
 // Endpoint("Foo.Bar") returns http://localhost:9090/foo/bar
-func (p *Router) Endpoint(rpcEp string) (string, error) {
+func (p *Router) Endpoint(rpcEp string) (string, string, error) {
 	p.setup()
 
+	md := "GET"
 	// get http endpoint
 	ep, ok := p.eps[rpcEp]
 	if !ok {
 		// get default
 		ep = p.Resolver.Resolve(rpcEp)
+		md = "POST"
+	}
+
+	ep = strings.TrimSpace(ep)
+	parts := strings.Fields(ep)
+	if len(parts) > 1 {
+		md = parts[0]
+		ep = parts[1]
 	}
 
 	// already full qualified URL
 	if strings.HasPrefix(ep, "http://") || strings.HasPrefix(ep, "https://") {
-		return ep, nil
+		return md, ep, nil
 	}
-
-	// parse into url
 
 	// full path to call
 	u, err := url.Parse(p.Backend)
 	if err != nil {
-		return "", err
+		return md, "", err
 	}
 
+	ref, err := url.Parse(ep)
+	if err != nil {
+		return md, "", err
+	}
 	// set path
-	u.Path = filepath.Join(u.Path, ep)
+	u = u.ResolveReference(ref)
 
 	// set scheme
 	if len(u.Scheme) == 0 {
@@ -100,7 +115,7 @@ func (p *Router) Endpoint(rpcEp string) (string, error) {
 	}
 
 	// create ep
-	return u.String(), nil
+	return md, u.String(), nil
 }
 
 // RegisterEndpoint registers a http endpoint against an RPC endpoint.
@@ -122,8 +137,8 @@ func (p *Router) ProcessMessage(ctx context.Context, msg server.Message) error {
 	return nil
 }
 
+// rudimentary post based streaming
 func (p *Router) ServeRequest(ctx context.Context, req server.Request, rsp server.Response) error {
-	// rudimentary post based streaming
 	for {
 		// get data
 		body, err := req.Read()
@@ -134,28 +149,47 @@ func (p *Router) ServeRequest(ctx context.Context, req server.Request, rsp serve
 			return err
 		}
 
-		var rpcEp string
-
 		// get rpc endpoint
-		if p.first {
-			p.first = false
-			rpcEp = req.Endpoint()
-		} else {
-			hdr := req.Header()
-			rpcEp = hdr["X-Micro-Endpoint"]
-		}
+		rpcEp := req.Endpoint()
 
 		// get http endpoint
-		ep, err := p.Endpoint(rpcEp)
+		md, ep, err := p.Endpoint(rpcEp)
 		if err != nil {
-			return errors.NotFound(req.Service(), err.Error())
+			return errors.NotFound(req.Service(), "%s", err.Error())
 		}
 
 		// no stream support currently
 		// TODO: lookup host
-		hreq, err := http.NewRequest("POST", ep, bytes.NewReader(body))
-		if err != nil {
-			return errors.InternalServerError(req.Service(), err.Error())
+		var hreq *http.Request
+		switch md {
+		case "GET":
+			var params map[string]interface{}
+			err = json.Unmarshal(body, &params)
+			if err != nil {
+				return errors.NotFound(req.Service(), "%s", err.Error())
+			}
+			var queryParams []string
+			for key, value := range params {
+				switch v := value.(type) {
+				case float64, float32:
+					encodedValue := url.QueryEscape(removeTrailingZeros(fmt.Sprintf("%.10f", v)))
+					queryParams = append(queryParams, fmt.Sprintf("%s=%s", key, encodedValue))
+				default:
+					encodedValue := url.QueryEscape(fmt.Sprintf("%+v", v))
+					queryParams = append(queryParams, fmt.Sprintf("%s=%s", key, encodedValue))
+				}
+			}
+			queryUri := strings.Join(queryParams, "&")
+			url := fmt.Sprintf("%s?%s", ep, queryUri)
+			hreq, err = http.NewRequest(md, url, nil)
+			if err != nil {
+				return errors.InternalServerError(req.Service(), "%s", err.Error())
+			}
+		default:
+			hreq, err = http.NewRequest("POST", ep, bytes.NewReader(body))
+			if err != nil {
+				return errors.InternalServerError(req.Service(), "%s", err.Error())
+			}
 		}
 
 		// get the header
@@ -169,14 +203,14 @@ func (p *Router) ServeRequest(ctx context.Context, req server.Request, rsp serve
 		// make the call
 		hrsp, err := http.DefaultClient.Do(hreq)
 		if err != nil {
-			return errors.InternalServerError(req.Service(), err.Error())
+			return errors.InternalServerError(req.Service(), "%s", err.Error())
 		}
 
 		// read body
 		b, err := io.ReadAll(hrsp.Body)
 		hrsp.Body.Close()
 		if err != nil {
-			return errors.InternalServerError(req.Service(), err.Error())
+			return errors.InternalServerError(req.Service(), "%s", err.Error())
 		}
 
 		// set response headers
@@ -192,7 +226,7 @@ func (p *Router) ServeRequest(ctx context.Context, req server.Request, rsp serve
 			return nil
 		}
 		if err != nil {
-			return errors.InternalServerError(req.Service(), err.Error())
+			return errors.InternalServerError(req.Service(), "%s", err.Error())
 		}
 	}
 }
@@ -219,10 +253,9 @@ func (p *Router) ServeRequest(ctx context.Context, req server.Request, rsp serve
 //
 //	// Run the service
 //	service.Run()
-func NewSingleHostRouter(url string) *Router {
+func NewSingleHostRouter() *Router {
 	return &Router{
 		Resolver: new(Resolver),
-		Backend:  url,
 		eps:      map[string]string{},
 	}
 }
@@ -266,4 +299,14 @@ func NewService(opts ...micro.Option) micro.Service {
 //	RegisterEndpoint("Greeter.Hello", "http://localhost:8080/")
 func RegisterEndpoint(rpcEp string, httpEp string) error {
 	return DefaultRouter.RegisterEndpoint(rpcEp, httpEp)
+}
+
+func removeTrailingZeros(s string) string {
+	if strings.Contains(s, ".") {
+		s = strings.TrimRight(s, "0")
+		if strings.HasSuffix(s, ".") {
+			s = strings.TrimRight(s, ".")
+		}
+	}
+	return s
 }

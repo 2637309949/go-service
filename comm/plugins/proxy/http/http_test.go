@@ -55,9 +55,8 @@ func TestHTTPRouter(t *testing.T) {
 	http.Handle("/greeter", new(testHandler))
 
 	// new proxy
-	p := NewSingleHostRouter(url)
-
-	// register a route
+	p := NewSingleHostRouter()
+	p.SetBackend(url)
 	p.RegisterEndpoint("Hello.World", "/helloworld")
 	p.RegisterEndpoint("Greeter.Hello", url+"/greeter")
 

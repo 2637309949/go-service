@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "/;test";
+
+import "google/api/annotations.proto";
+
+message Empty{}
+service TestService {
+	rpc ListWeather (Empty) returns (Empty) {
+		option (google.api.http) = {
+			get: "/ListWeather" // expose httpApi
+			authorization: false
+			scope: "test"
+			body: "*"
+		};
+	}
+}

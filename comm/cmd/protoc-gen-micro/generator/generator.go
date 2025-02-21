@@ -479,7 +479,7 @@ func (g *Generator) CommandLineParameters(parameter string) {
 	}
 
 	g.ImportMap = make(map[string]string)
-	pluginList := "none" // Default list of plugin names to enable (empty means all).
+	pluginList := "micro" // Default list of plugin names to enable (empty means all).
 	for k, v := range g.Param {
 		switch k {
 		case "import_prefix":
@@ -513,22 +513,18 @@ func (g *Generator) CommandLineParameters(parameter string) {
 		}
 	}
 
-	if pluginList != "" {
-		// Amend the set of plugins.
-		enabled := map[string]bool{
-			"micro": false,
-		}
-		for _, name := range strings.Split(pluginList, "+") {
-			enabled[name] = true
-		}
-		var nplugins []Plugin
-		for _, p := range plugins {
-			if enabled[p.Name()] {
-				nplugins = append(nplugins, p)
-			}
-		}
-		plugins = nplugins
+	// Amend the set of plugins.
+	enabled := map[string]bool{}
+	for _, name := range strings.Split(pluginList, "+") {
+		enabled[name] = true
 	}
+	var nplugins []Plugin
+	for _, p := range plugins {
+		if enabled[p.Name()] {
+			nplugins = append(nplugins, p)
+		}
+	}
+	plugins = nplugins
 }
 
 // DefaultPackageName returns the package name printed for the object.

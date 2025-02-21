@@ -298,3 +298,10 @@ func Logger(l logger.Logger) micro.Option {
 		o.Logger = l
 	}
 }
+
+// Router sets the request router.
+func Router(r server.Router) micro.Option {
+	return func(o *micro.Options) {
+		o.Server.Init(server.WithRouter(r))
+	}
+}

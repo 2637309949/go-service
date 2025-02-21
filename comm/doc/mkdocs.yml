@@ -1,0 +1,64 @@
+site_name: MicroV5+
+theme:
+  name: 'material'
+  palette:
+    primary: blue
+  features:
+    - navigation.tabs
+    - navigation.expand
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.instant
+    - search.suggest
+    - content.code.copy
+    - content.code.select
+    - content.code.annotate 
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+plugins:
+  - search
+nav:
+  - 项目介绍: README.md
+  - 基础用例:
+      - 服务定义: 基础用例/服务定义.md
+      - 增删改查: 基础用例/增删改查.md
+      - 参数校验: 基础用例/参数校验.md
+      - 错误处理: 基础用例/错误处理.md
+      - 日志打印: 基础用例/日志打印.md
+      - 耗时计算: 基础用例/耗时计算.md
+      - 接口缓存: 基础用例/接口缓存.md
+      - 应用配置: 基础用例/应用配置.md
+      - 接口鉴权: 基础用例/接口鉴权.md
+      - 定时任务: 基础用例/定时任务.md
+      - 分布式锁: 基础用例/分布式锁.md
+  - 高级服务:
+      - 网关服务: 高级服务/网关服务.md
+      - 鉴权服务: 高级服务/鉴权服务.md
+      - 缓存服务: 高级服务/缓存服务.md
+      - 服务代理: 高级服务/服务代理.md
+      - 推送服务: 高级服务/推送服务.md
+      - 消息服务: 高级服务/消息服务.md
+      - 文件服务: 高级服务/文件服务.md
+      - 事务服务: 高级服务/事务服务.md
+  - 深入理解:
+      - logger: 深入理解/logger.md
+      - config: 深入理解/config.md
+      - errors: 深入理解/errors.md
+      - config: 深入理解/config.md
+      - transport: 深入理解/transport.md
+      - selector: 深入理解/selector.md
+      - registry: 深入理解/registry.md
+      - metadata: 深入理解/metadata.md
+      - codec: 深入理解/codec.md
+      - trace: 深入理解/trace.md
+      - monitoring: 深入理解/monitoring.md
+      - breaker: 深入理解/breaker.md
+      - ratelimiter: 深入理解/ratelimiter.md
+      - validator: 深入理解/validator.md

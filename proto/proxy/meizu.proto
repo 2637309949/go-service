@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+option go_package = "/;proxy";
+
+message WeatherFilter {
+	string cityIds = 1 [json_name = "cityIds"];
+}
+
+message WeatherList {
+    message Indexes {
+        string abbreviation = 1;
+        string alias = 2;
+        string content = 3;
+        string level = 4;
+        string name = 5;
+    }
+
+    message Pm25 {
+        string advice = 1;
+        string aqi = 2;
+        uint32 citycount = 3;
+        uint32 cityrank = 4;
+        string co = 5;
+        string color = 6;
+        string level = 7;
+        string no2 = 8;
+        string o3 = 9;
+        string pm10 = 10;
+        string pm25 = 11;
+        string quality = 12;
+        string so2 = 13;
+        string timestamp = 14;
+        string up_date_time = 15;
+    }
+
+    message Realtime {
+        string img = 1;
+        string s_d = 2;
+        string sendible_temp = 3;
+        string temp = 4;
+        string time = 5;
+        string w_d = 6;
+        string w_s = 7;
+        string weather = 8;
+        string ziwaixian = 9;
+    }
+
+    message Weather3_hours_details_infos {
+        string end_time = 1;
+        string highest_temperature = 2;
+        string img = 3;
+        string is_rain_fall = 4;
+        string lowerest_temperature = 5;
+        string precipitation = 6;
+        string start_time = 7;
+        string wd = 8;
+        string weather = 9;
+        string ws = 10;
+    }
+
+    message Weather_details_info {
+        string publish_time = 1;
+        repeated Weather3_hours_details_infos weather3_hours_details_infos = 2;
+    }
+
+    message Weathers {
+        string aqi = 1;
+        string date = 2;
+        string img = 3;
+        string sun_down_time = 4;
+        string sun_rise_time = 5;
+        string temp_day_c = 6;
+        string temp_day_f = 7;
+        string temp_night_c = 8;
+        string temp_night_f = 9;
+        string wd = 10;
+        string weather = 11;
+        string week = 12;
+        string ws = 13;
+    }
+
+    message Value {
+        repeated google.protobuf.Any alarms = 1;
+        string city = 2;
+        uint32 cityid = 3;
+        repeated Indexes indexes = 4;
+        Pm25 pm25 = 5;
+        string province_name = 6;
+        Realtime realtime = 7;
+        Weather_details_info weather_details_info = 8;
+        repeated Weathers weathers = 9;
+    }
+
+    string code = 1;
+    string message = 2;
+    string redirect = 3;
+    repeated Value value = 4;
+}

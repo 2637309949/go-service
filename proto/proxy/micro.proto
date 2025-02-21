@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option go_package = "/;proxy";
+
+message MicroFilter {
+	int32 page_no = 1 [json_name = "page_no"];
+	int32 page_size = 2 [json_name = "page_size"];
+	int32 order_type = 3 [json_name = "order_type"];
+	string order_col = 4 [json_name = "order_col"];
+    int32 id = 5 [json_name = "id"];
+}
+
+message Micro {
+    string version = 8 [json_name = "version"];
+}
