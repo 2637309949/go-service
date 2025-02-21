@@ -1,14 +1,14 @@
 syntax = "proto3";
 
-option go_package = "/;web/fileupload";
+option go_package = "/;web/upload";
 
 import "google/api/annotations.proto";
 import "http/http.proto";
 
-service FileUploadService {
-	rpc Upload (http.ResponseWriter) returns (http.Request) {
+service UploadService {
+	rpc Activitys (http.ResponseWriter) returns (http.Request) {
 		option (google.api.http) = {
-			post: "/upload" // expose httpApi
+			post: "/Activitys" // expose httpApi
 			authorization: false
 			body: "*"
 		};

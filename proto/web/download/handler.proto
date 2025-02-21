@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option go_package = "/;web/download";
+
+import "google/api/annotations.proto";
+import "http/http.proto";
+
+service DownloadService {
+	rpc Activitys (http.ResponseWriter) returns (http.Request) {
+		option (google.api.http) = {
+			get: "/Activitys" // expose httpApi
+			authorization: false
+			body: "*"
+		};
+	}
+}

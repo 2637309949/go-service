@@ -5,7 +5,7 @@ set GOPATH=%GOPATH%
 set PATH=%PATH%;%GOPATH%\bin
 
 :: 设置绝对路径
-set PROTO_DIR=%CD%\..\..\proto\web\filedownload
+set PROTO_DIR=%CD%\..\..\proto\web\upload
 set INCLUDE_DIR=%CD%\..\..\comm\include
 
 for %%F in (%PROTO_DIR%\*.proto) do (

@@ -1,4 +1,4 @@
-module filedownload
+module upload
 
 go 1.22.0
 
@@ -25,6 +25,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/micro/plugins/v5/registry/consul v0.0.0-00010101000000-000000000000 // indirect
 	github.com/micro/plugins/v5/source/consul v0.0.0-00010101000000-000000000000 // indirect
+	github.com/micro/plugins/v5/wrapper/trace/opentracing v0.0.0-00010101000000-000000000000 // indirect
 	github.com/miekg/dns v1.1.50 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/hashstructure v1.1.0 // indirect
@@ -33,7 +34,6 @@ require (
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/uber/jaeger-client-go v2.30.0+incompatible // indirect
