@@ -30,6 +30,11 @@ cd ./comm/cmd/protobuf-go/cmd/protoc-gen-go && go install
 cd ./comm/cmd/protobuf-go/cmd/protoc-gen-validate && go install
 ```
 
+在Window环境安装自定义make, unix环境不需要
+```
+cd ./comm/cmd/protobuf-go/cmd/make && go install
+```
+
 最后安装配置服务 `consul`
 ```bash linenums="1"
 hub="https://releases.hashicorp.com/consul"
@@ -38,7 +43,7 @@ wget "$hub$releases"
 unzip consul_1.20.2_linux_amd64.zip
 ```
 
-启动 `consul`
+启动 `consul`, 该部署指令仅用于测试, 不要用在生产上
 ```bash linenums="1"
 ./consul agent \
 -server \

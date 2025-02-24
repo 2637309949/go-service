@@ -52,7 +52,7 @@ func main() {
 	r.Use(util.CorsMiddle)
 	r.Any("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"version": "5.1",
+			"version": "5+",
 		})
 	})
 	r.GET("/favicon.ico", func(c *gin.Context) {})

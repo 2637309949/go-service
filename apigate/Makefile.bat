@@ -5,11 +5,11 @@ set GOPATH=%GOPATH%
 set PATH=%PATH%;%GOPATH%\bin
 
 set INSTALL_PATH=C:\\go-micro
-set SERVICE_NAME=cache.exe
+set SERVICE_NAME=apigate.exe
 set CMD= 
 
 :: 设置绝对路径
-set PROTO_DIR=%CD%\..\proto\cache
+set PROTO_DIR=%CD%\..\proto\apigate
 set INCLUDE_DIR=%CD%\..\comm\include
 
 for %%F in (%PROTO_DIR%\*.proto) do (
