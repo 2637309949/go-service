@@ -1,10 +1,14 @@
-package auth
+package router
 
 import (
+	"apigate/auth"
+	"context"
 	"errors"
 	"time"
 
 	gt "github.com/golang-jwt/jwt"
+	"go-micro.dev/v5/client"
+	"go-micro.dev/v5/metadata"
 )
 
 var (
@@ -26,16 +30,13 @@ type authClaims struct {
 // also cache
 type jwt struct{}
 
-func (a *jwt) Generate(acc *Account, opt ...Option) (*Token, error) {
-	opts := Options{}
-	secret := ""
-	for _, o := range opt {
-		o(&opts)
-	}
-
+func (a *jwt) Generate(ctx context.Context, acc *auth.Account, opts ...client.CallOption) (*auth.Token, error) {
+	md, _ := metadata.FromContext(ctx)
+	secret := md["secret"]
+	host := md["Host"]
 	// auth policy by hostname
-	switch opts.Host {
-	case "your.hostname":
+	switch host {
+	case "yourhost":
 	default:
 		secret = DefaultSecret
 	}
@@ -43,11 +44,12 @@ func (a *jwt) Generate(acc *Account, opt ...Option) (*Token, error) {
 	// generate the JWT
 	now := time.Now()
 	expiry := now
-	if opts.Expiry == 0 {
+	expirys := time.Duration(0)
+	if expirys == 0 {
 		nextDay := now.Add(24 * time.Hour)
 		expiry = time.Date(nextDay.Year(), nextDay.Month(), nextDay.Day(), 5, 0, 0, 0, nextDay.Location())
 	} else {
-		expiry = now.Add(opts.Expiry)
+		expiry = now.Add(expirys)
 	}
 	t := gt.NewWithClaims(gt.SigningMethodRS256, authClaims{
 		Roles: acc.Roles, Name: acc.Name,
@@ -63,62 +65,47 @@ func (a *jwt) Generate(acc *Account, opt ...Option) (*Token, error) {
 	}
 
 	// return the token
-	return &Token{
+	return &auth.Token{
 		AccessToken:  tok,
 		RefreshToken: tok,
-		Expiry:       expiry,
-		Created:      time.Now(),
+		Expiry:       expiry.Unix(),
+		Created:      now.Unix(),
 	}, nil
 }
 
-func (a *jwt) Inspect(token string, opt ...Option) (*Account, error) {
-	opts := Options{}
-	acc := Account{}
-	for _, o := range opt {
-		o(&opts)
-	}
-
-	// auth policy by hostname
-	switch opts.Host {
-	case "xxx":
-	default:
-
-	}
-	// fmt.Printf("%+v\n", opts.Host)
-	return &acc, nil
-}
-
-func (a *jwt) Verify(acc *Account, scope string, opt ...Option) error {
-	opts := Options{}
-	for _, o := range opt {
-		o(&opts)
-	}
-
-	// auth policy by hostname
-	switch opts.Host {
-	case "xxx":
-	default:
-
-	}
-	return nil
-}
-
-func (a *jwt) Refresh(token string, opt ...Option) (*Token, error) {
-	opts := Options{}
-	acc := Token{}
-	for _, o := range opt {
-		o(&opts)
-	}
-
-	// auth policy by hostname
-	switch opts.Host {
-	case "xxx":
+func (a *jwt) Inspect(ctx context.Context, token *auth.Token, opt ...client.CallOption) (*auth.Account, error) {
+	md, _ := metadata.FromContext(ctx)
+	host := md["Host"]
+	acc := auth.Account{}
+	switch host {
+	case "yourhost":
 	default:
 
 	}
 	return &acc, nil
 }
 
-func NewJWT() Auth {
+func (a *jwt) Verify(ctx context.Context, ct *auth.Credential, opts ...client.CallOption) (*auth.Empty, error) {
+	md, _ := metadata.FromContext(ctx)
+	host := md["Host"]
+	switch host {
+	case "yourhost":
+	default:
+	}
+	return &auth.Empty{}, nil
+}
+
+func (a *jwt) Refresh(ctx context.Context, tk *auth.Token, opts ...client.CallOption) (*auth.Token, error) {
+	md, _ := metadata.FromContext(ctx)
+	host := md["Host"]
+	acc := auth.Token{}
+	switch host {
+	case "yourhost":
+	default:
+	}
+	return &acc, nil
+}
+
+func NewJWT() auth.AuthService {
 	return &jwt{}
 }

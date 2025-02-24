@@ -2,8 +2,8 @@ package registry
 
 import (
 	"apigate/api"
+	"apigate/auth"
 	"apigate/router"
-	"apigate/router/auth"
 	"errors"
 	"net/http"
 	"path"
@@ -92,12 +92,12 @@ func (r *registryRouter) auth(req *http.Request, rp *Endpoint) error {
 		if r.opts.Auth == nil {
 			return errors.New("no auth policy found")
 		}
-		acc, err := r.opts.Auth.Inspect(rp.Token, auth.WithContext(cx), auth.Host(req.Host))
+		_, err := r.opts.Auth.Inspect(cx, &auth.Token{AccessToken: rp.Token})
 		if err != nil {
 			return err
 		}
 		if len(rp.Scope) > 0 {
-			err = r.opts.Auth.Verify(acc, rp.Scope, auth.WithContext(cx), auth.Host(req.Host))
+			_, err = r.opts.Auth.Verify(cx, &auth.Credential{Token: rp.Token, Scope: rp.Scope})
 			if err != nil {
 				return err
 			}

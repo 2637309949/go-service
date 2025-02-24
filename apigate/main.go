@@ -5,7 +5,6 @@ import (
 	"apigate/handler/rpc"
 	"apigate/handler/web"
 	"apigate/router"
-	"apigate/router/auth"
 	"apigate/router/registry"
 	"apigate/util"
 	"comm/config"
@@ -37,7 +36,7 @@ func main() {
 	opts = append(opts, handler.WithApiBase(apiBase))
 	opts = append(opts, handler.WithRouter(
 		registry.NewRouter(
-			router.WithAuth(auth.NewJWT()),
+			router.WithAuth(router.NewJWT()),
 			router.WithRegistry(consulRegistry),
 		),
 	))

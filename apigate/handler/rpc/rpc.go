@@ -55,6 +55,17 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	r.Body = http.MaxBytesReader(w, r.Body, bsize)
 
+	// create context
+	cx := util.FromRequest(r)
+	// strip headers grpc doesn't like
+	md, _ := metadata.FromContext(cx)
+	// delete websocket info
+	delete(md, "Connection")
+	cx = metadata.NewContext(cx, md)
+
+	// set merged context to request
+	*r = *r.Clone(cx)
+
 	defer r.Body.Close()
 
 	var service *api.Service
@@ -80,20 +91,6 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if idx := strings.IndexRune(ct, ';'); idx >= 0 {
 		ct = ct[:idx]
 	}
-
-	// delete some headers
-
-	// create context
-	cx := util.FromRequest(r)
-
-	// strip headers grpc doesn't like
-	md, _ := metadata.FromContext(cx)
-	// delete websocket info
-	delete(md, "Connection")
-	cx = metadata.NewContext(cx, md)
-
-	// set merged context to request
-	*r = *r.Clone(cx)
 
 	// create custom router
 	var nodes []string
