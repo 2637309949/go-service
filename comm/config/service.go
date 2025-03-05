@@ -2,7 +2,6 @@ package config
 
 type Service interface {
 	Name() string
-	Run() error
 }
 
 var (

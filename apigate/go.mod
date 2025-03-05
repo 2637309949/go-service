@@ -91,5 +91,4 @@ replace (
 	github.com/micro/plugins/v5/source/consul => ../comm/plugins/source/consul
 	github.com/micro/plugins/v5/wrapper/trace/opentracing => ../comm/plugins/wrapper/trace/opentracing
 	go-micro.dev/v5 => ../comm/go-micro
-	micro.dev/v4 => ../comm/micro
 )
