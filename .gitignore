@@ -34,7 +34,7 @@ micro
 !micro/
 dist/
 ./consul
-comm/config/data
+comm/assert/data
 
 *.bak
 
