@@ -18,10 +18,6 @@ import (
 	"go-micro.dev/v5/selector"
 )
 
-const (
-	Handler = "web"
-)
-
 type webHandler struct {
 	opts handler.Options
 }

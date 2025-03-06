@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"path"
+	"strings"
 
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/registry/cache"
@@ -135,7 +136,7 @@ func (r *registryRouter) match(rp *Endpoint, services []*registry.Service) (*api
 				continue
 			}
 
-			if endpoint.Method != rp.Method || endpoint.Path != rp.Path {
+			if endpoint.Method != rp.Method || strings.ToLower(endpoint.Path) != strings.ToLower(rp.Path) {
 				continue
 			}
 

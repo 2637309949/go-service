@@ -33,7 +33,7 @@ func main() {
 	opts = append(opts, handler.WithHandler(web.NewHandler(opts...)))
 	hd := handler.NewHandler(opts...)
 	r.Init(router.WithRegistry(service.Options().Registry))
-	service.Handle(fmt.Sprintf("%s/", apiBase), hd, wb.Seen(true))
+	service.Handle(fmt.Sprintf("%s/", hd.Options().ApiBase), hd, wb.NoSeen(true))
 
 	// register handler
 	pb.RegisterApigateServiceHandler(service, hd)

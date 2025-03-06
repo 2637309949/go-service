@@ -318,7 +318,7 @@ func (s *service) Client() *http.Client {
 
 func (s *service) Handle(pattern string, handler http.Handler, opts ...Option) {
 	options := newOptions(opts...)
-	seen, _ := options.Context.Value(seenKey{}).(bool)
+	seen, _ := options.Context.Value(noSeenKey{}).(bool)
 
 	s.RLock()
 	for _, ep := range s.srv.Endpoints {
@@ -363,7 +363,7 @@ func (s *service) Handle(pattern string, handler http.Handler, opts ...Option) {
 
 func (s *service) HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request), opts ...Option) {
 	options := newOptions(opts...)
-	seen, _ := options.Context.Value(seenKey{}).(bool)
+	seen, _ := options.Context.Value(noSeenKey{}).(bool)
 
 	s.RLock()
 	for _, ep := range s.srv.Endpoints {

@@ -12,7 +12,7 @@ import (
 	"go-micro.dev/v5/registry"
 )
 
-type seenKey struct{}
+type noSeenKey struct{}
 
 // Options for web.
 type Options struct {
@@ -298,11 +298,11 @@ func WrapHandler(w HandlerWrapper) Option {
 }
 
 // No register handler
-func Seen(s bool) Option {
+func NoSeen(s bool) Option {
 	return func(o *Options) {
 		if o.Context == nil {
 			o.Context = context.Background()
 		}
-		o.Context = context.WithValue(o.Context, seenKey{}, s)
+		o.Context = context.WithValue(o.Context, noSeenKey{}, s)
 	}
 }

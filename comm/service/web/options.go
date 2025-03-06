@@ -76,8 +76,8 @@ func Handler(h http.Handler) web.Option {
 	return web.Handler(h)
 }
 
-func Seen(s bool) web.Option {
-	return web.Seen(s)
+func NoSeen(s bool) web.Option {
+	return web.NoSeen(s)
 }
 
 // Server for custom Server.
