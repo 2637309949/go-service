@@ -2,21 +2,42 @@ package util
 
 import (
 	"apigate/router/registry"
+	"comm/service/web"
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/micro/plugins/v5/wrapper/trace/opentracing"
 	ogo "github.com/opentracing/opentracing-go"
 )
 
-var CorsMiddle = cors.New(cors.Config{
-	AllowAllOrigins: true,
-	AllowMethods:    []string{"POST", "PATCH", "GET", "OPTIONS", "PUT", "DELETE"},
-	AllowHeaders:    []string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "Micro-Namespace"},
-})
+func WrapCors() web.HandlerWrapper {
+	return func(h web.HandlerFunc) web.HandlerFunc {
+		set := func(w http.ResponseWriter, k, v string) {
+			if v := w.Header().Get(k); len(v) > 0 {
+				return
+			}
+			w.Header().Set(k, v)
+		}
+		return func(w http.ResponseWriter, r *http.Request) {
+			if origin := r.Header.Get("Origin"); len(origin) > 0 {
+				set(w, "Access-Control-Allow-Origin", origin)
+			} else {
+				set(w, "Access-Control-Allow-Origin", "*")
+			}
+			set(w, "Access-Control-Allow-Credentials", "true")
+			set(w, "Access-Control-Allow-Methods", "POST, PATCH, GET, OPTIONS, PUT, DELETE")
+			set(w, "Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Micro-Namespace")
+
+			if r.Method == "OPTIONS" {
+				return
+			}
+			h(w, r)
+		}
+	}
+}
 
 func ResolverMiddle(apiBase string) gin.HandlerFunc {
 	resolver := registry.NewResolver()

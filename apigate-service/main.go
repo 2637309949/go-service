@@ -6,10 +6,9 @@ import (
 	"apigate/handler/web"
 	"apigate/router"
 	"apigate/router/registry"
+	"apigate/util"
 	"comm/config"
 	wb "comm/service/web"
-	"context"
-	"net/http"
 	"fmt"
 	pb "proto/apigate"
 )
@@ -22,39 +21,7 @@ func main() {
 	service := wb.NewService(
 		wb.Name("apigate"),
 		wb.Address(config.String("addr")),
-		wb.WrapHandler(func(h wb.HandlerFunc) wb.HandlerFunc {
-			set := func(w http.ResponseWriter, k, v string) {
-				if v := w.Header().Get(k); len(v) > 0 {
-					return
-				}
-				w.Header().Set(k, v)
-			}
-			return func(w http.ResponseWriter, r *http.Request) {
-				if origin := r.Header.Get("Origin"); len(origin) > 0 {
-					set(w, "Access-Control-Allow-Origin", origin)
-				} else {
-					set(w, "Access-Control-Allow-Origin", "*")
-				}
-				set(w, "Access-Control-Allow-Credentials", "true")
-				set(w, "Access-Control-Allow-Methods", "POST, PATCH, GET, OPTIONS, PUT, DELETE")
-				set(w, "Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Micro-Namespace")
-
-				if r.Method == "OPTIONS" {
-					return
-				}
-				h(w, r)
-			}
-		}),
-		wb.WrapHandler(func(h wb.HandlerFunc) wb.HandlerFunc {
-			resolver := registry.NewResolver()
-			return func(w http.ResponseWriter, r *http.Request) {
-				endpoint := resolver.Resolve(apiBase, r)
-				ctx := r.Context()
-				ctx = context.WithValue(ctx, registry.Endpoint{}, *endpoint)
-				*r = *r.Clone(ctx)
-				h(w, r)
-			}
-		}),
+		wb.WrapHandler(util.WrapCors()),
 	)
 
 	// register router
