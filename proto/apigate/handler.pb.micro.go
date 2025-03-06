@@ -5,15 +5,23 @@ package apigate
 
 import (
 	fmt "fmt"
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	proto "google.golang.org/protobuf/proto"
 	math "math"
+	http "net/http"
 )
 
 import (
 	context "context"
 	client "go-micro.dev/v5/client"
+	metadata "go-micro.dev/v5/metadata"
 	registry "go-micro.dev/v5/registry"
 	server "go-micro.dev/v5/server"
+	wb "go-micro.dev/v5/web"
+	httputil "net/http/httputil"
+	textproto "net/textproto"
+	url "net/url"
+	strings "strings"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -27,112 +35,159 @@ var _ context.Context
 var _ client.Option
 var _ server.Option
 
-// Api Endpoints for AuthService service
+// Api Endpoints for ApigateService service
 
-func NewAuthServiceEndpoints() []*registry.Endpoint {
-	return []*registry.Endpoint{}
+func NewApigateServiceEndpoints() []*registry.Endpoint {
+	return []*registry.Endpoint{
+		{
+			Authorization: false,
+			Scope:         "",
+			Name:          "ApigateService.Home",
+			Path:          "/",
+			Method:        "GET",
+			Handler:       "web",
+		},
+		{
+			Authorization: false,
+			Scope:         "",
+			Name:          "ApigateService.Favicon",
+			Path:          "/favicon.ico",
+			Method:        "GET",
+			Handler:       "web",
+		},
+	}
 }
 
-// Client API for AuthService service
+// Client API for ApigateService service
 
-type AuthService interface {
-	Generate(ctx context.Context, in *Account, opts ...client.CallOption) (*Token, error)
-	Inspect(ctx context.Context, in *Token, opts ...client.CallOption) (*Account, error)
-	Verify(ctx context.Context, in *Credential, opts ...client.CallOption) (*Empty, error)
-	Refresh(ctx context.Context, in *Token, opts ...client.CallOption) (*Token, error)
+type ApigateService interface {
+	Home(ctx context.Context, w http.ResponseWriter, r *http.Request)
+	Favicon(ctx context.Context, w http.ResponseWriter, r *http.Request)
 }
 
-type authService struct {
+type apigateService struct {
 	c    client.Client
 	name string
 }
 
-func NewAuthService(name string, c client.Client) AuthService {
-	return &authService{
+func NewApigateService(name string, c client.Client) ApigateService {
+	return &apigateService{
 		c:    c,
 		name: name,
 	}
 }
 
-func (c *authService) Generate(ctx context.Context, in *Account, opts ...client.CallOption) (*Token, error) {
-	req := c.c.NewRequest(c.name, "AuthService.Generate", in)
-	out := new(Token)
-	err := c.c.Call(ctx, req, out, opts...)
+func (c *apigateService) Home(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	next, err := c.c.Options().Selector.Select(c.name)
 	if err != nil {
-		return nil, err
+		return
 	}
-	return out, nil
-}
-
-func (c *authService) Inspect(ctx context.Context, in *Token, opts ...client.CallOption) (*Account, error) {
-	req := c.c.NewRequest(c.name, "AuthService.Inspect", in)
-	out := new(Account)
-	err := c.c.Call(ctx, req, out, opts...)
+	s, err := next()
 	if err != nil {
-		return nil, err
+		return
 	}
-	return out, nil
-}
-
-func (c *authService) Verify(ctx context.Context, in *Credential, opts ...client.CallOption) (*Empty, error) {
-	req := c.c.NewRequest(c.name, "AuthService.Verify", in)
-	out := new(Empty)
-	err := c.c.Call(ctx, req, out, opts...)
+	service := fmt.Sprintf("http://%s", s.Address)
+	if len(service) == 0 {
+		w.WriteHeader(404)
+		return
+	}
+	rp, err := url.Parse(service)
 	if err != nil {
-		return nil, err
+		w.WriteHeader(500)
+		return
 	}
-	return out, nil
+	httputil.NewSingleHostReverseProxy(rp).ServeHTTP(w, r)
 }
 
-func (c *authService) Refresh(ctx context.Context, in *Token, opts ...client.CallOption) (*Token, error) {
-	req := c.c.NewRequest(c.name, "AuthService.Refresh", in)
-	out := new(Token)
-	err := c.c.Call(ctx, req, out, opts...)
+func (c *apigateService) Favicon(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	next, err := c.c.Options().Selector.Select(c.name)
 	if err != nil {
-		return nil, err
+		return
 	}
-	return out, nil
-}
-
-// Server API for AuthService service
-
-type AuthServiceHandler interface {
-	Generate(context.Context, *Account, *Token) error
-	Inspect(context.Context, *Token, *Account) error
-	Verify(context.Context, *Credential, *Empty) error
-	Refresh(context.Context, *Token, *Token) error
-}
-
-func RegisterAuthServiceHandler(s server.Server, hdlr AuthServiceHandler, opts ...server.HandlerOption) error {
-	type authService interface {
-		Generate(ctx context.Context, in *Account, out *Token) error
-		Inspect(ctx context.Context, in *Token, out *Account) error
-		Verify(ctx context.Context, in *Credential, out *Empty) error
-		Refresh(ctx context.Context, in *Token, out *Token) error
+	s, err := next()
+	if err != nil {
+		return
 	}
-	type AuthService struct {
-		authService
+	service := fmt.Sprintf("http://%s", s.Address)
+	if len(service) == 0 {
+		w.WriteHeader(404)
+		return
 	}
-	h := &authServiceHandler{hdlr}
-	return s.Handle(s.NewHandler(&AuthService{h}, opts...))
+	rp, err := url.Parse(service)
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+	httputil.NewSingleHostReverseProxy(rp).ServeHTTP(w, r)
 }
 
-type authServiceHandler struct {
-	AuthServiceHandler
+// Server API for ApigateService service
+
+type ApigateServiceHandler interface {
+	Home(context.Context, http.ResponseWriter, *http.Request)
+	Favicon(context.Context, http.ResponseWriter, *http.Request)
 }
 
-func (h *authServiceHandler) Generate(ctx context.Context, in *Account, out *Token) error {
-	return h.AuthServiceHandler.Generate(ctx, in, out)
+func RegisterApigateServiceHandler(s wb.Service, hdlr ApigateServiceHandler, opts ...wb.Option) {
+	opts = append(opts, wb.Endpoint(&registry.Endpoint{
+		Authorization: false,
+		Scope:         "",
+		Name:          "ApigateService.Home",
+		Path:          "/",
+		Method:        "GET",
+		Handler:       "web",
+	}))
+	opts = append(opts, wb.Endpoint(&registry.Endpoint{
+		Authorization: false,
+		Scope:         "",
+		Name:          "ApigateService.Favicon",
+		Path:          "/favicon.ico",
+		Method:        "GET",
+		Handler:       "web",
+	}))
+	s.Init(opts...)
+	s.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		cx := r.Context()
+		md, ok := metadata.FromContext(cx)
+		if !ok {
+			md = make(metadata.Metadata)
+		}
+		for k, v := range r.Header {
+			md[textproto.CanonicalMIMEHeaderKey(k)] = strings.Join(v, ", ")
+		}
+		md["Host"] = r.Host
+		if r.URL != nil {
+			md["URL"] = r.URL.String()
+		}
+		cx = metadata.NewContext(cx, md)
+		hdlr.Home(cx, w, r)
+	})
+	s.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		cx := r.Context()
+		md, ok := metadata.FromContext(cx)
+		if !ok {
+			md = make(metadata.Metadata)
+		}
+		for k, v := range r.Header {
+			md[textproto.CanonicalMIMEHeaderKey(k)] = strings.Join(v, ", ")
+		}
+		md["Host"] = r.Host
+		if r.URL != nil {
+			md["URL"] = r.URL.String()
+		}
+		cx = metadata.NewContext(cx, md)
+		hdlr.Favicon(cx, w, r)
+	})
 }
 
-func (h *authServiceHandler) Inspect(ctx context.Context, in *Token, out *Account) error {
-	return h.AuthServiceHandler.Inspect(ctx, in, out)
+type apigateServiceHandler struct {
+	ApigateServiceHandler
 }
 
-func (h *authServiceHandler) Verify(ctx context.Context, in *Credential, out *Empty) error {
-	return h.AuthServiceHandler.Verify(ctx, in, out)
+func (h *apigateServiceHandler) Home(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	h.ApigateServiceHandler.Home(ctx, w, r)
 }
 
-func (h *authServiceHandler) Refresh(ctx context.Context, in *Token, out *Token) error {
-	return h.AuthServiceHandler.Refresh(ctx, in, out)
+func (h *apigateServiceHandler) Favicon(ctx context.Context, w http.ResponseWriter, r *http.Request) {
+	h.ApigateServiceHandler.Favicon(ctx, w, r)
 }

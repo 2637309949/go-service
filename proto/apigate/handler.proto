@@ -2,11 +2,22 @@ syntax = "proto3";
 
 option go_package = "/;apigate";
 
-import "proto/apigate/apigate.proto";
+import "google/api/annotations.proto";
+import "http/http.proto";
 
-service AuthService {
-	rpc Generate(Account) returns (Token) {}
-	rpc Inspect(Token) returns (Account) {}
-	rpc Verify(Credential) returns (Empty) {}
-	rpc Refresh(Token) returns (Token) {}
+service ApigateService {
+	rpc Home (http.ResponseWriter) returns (http.Request) {
+		option (google.api.http) = {
+			get: "/" // expose httpApi
+			authorization: false
+			body: "*"
+		};
+	}
+	rpc Favicon (http.ResponseWriter) returns (http.Request) {
+		option (google.api.http) = {
+			get: "/favicon.ico" // expose httpApi
+			authorization: false
+			body: "*"
+		};
+	}
 }

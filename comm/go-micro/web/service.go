@@ -2,7 +2,6 @@ package web
 
 import (
 	"crypto/tls"
-	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -317,8 +316,10 @@ func (s *service) Client() *http.Client {
 	}
 }
 
-func (s *service) Handle(pattern string, handler http.Handler) {
-	var seen bool
+func (s *service) Handle(pattern string, handler http.Handler, opts ...Option) {
+	options := newOptions(opts...)
+	seen, _ := options.Context.Value(seenKey{}).(bool)
+
 	s.RLock()
 	for _, ep := range s.srv.Endpoints {
 		if ep.Path == pattern {
@@ -356,11 +357,13 @@ func (s *service) Handle(pattern string, handler http.Handler) {
 
 	handler = &serve{hsp}
 	// register the handler
-	s.mux.Handle(fmt.Sprintf("/%s%s", s.Name(), pattern), handler)
+	// s.mux.Handle(fmt.Sprintf("/%s%s", s.Name(), pattern), handler)
+	s.mux.Handle(pattern, handler)
 }
 
-func (s *service) HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
-	var seen bool
+func (s *service) HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request), opts ...Option) {
+	options := newOptions(opts...)
+	seen, _ := options.Context.Value(seenKey{}).(bool)
 
 	s.RLock()
 	for _, ep := range s.srv.Endpoints {
@@ -395,7 +398,8 @@ func (s *service) HandleFunc(pattern string, handler func(http.ResponseWriter, *
 		handler = s.opts.HdlrWrappers[i-1](handler)
 	}
 
-	s.mux.HandleFunc(fmt.Sprintf("/%s%s", s.Name(), pattern), handler)
+	// s.mux.HandleFunc(fmt.Sprintf("/%s%s", s.Name(), pattern), handler)
+	s.mux.HandleFunc(pattern, handler)
 }
 
 func (s *service) Init(opts ...Option) error {

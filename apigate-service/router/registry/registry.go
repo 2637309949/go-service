@@ -35,6 +35,13 @@ func (r *registryRouter) Options() router.Options {
 	return r.opts
 }
 
+func (r *registryRouter) Init(opts ...router.Option) {
+	for _, opt := range opts {
+		opt(&r.opts)
+	}
+	r.rc = cache.New(r.opts.Registry)
+}
+
 func (r *registryRouter) Close() error {
 	select {
 	case <-r.exit:

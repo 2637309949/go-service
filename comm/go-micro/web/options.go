@@ -12,6 +12,8 @@ import (
 	"go-micro.dev/v5/registry"
 )
 
+type seenKey struct{}
+
 // Options for web.
 type Options struct {
 	Handler http.Handler
@@ -292,5 +294,15 @@ func Endpoint(e *registry.Endpoint) Option {
 func WrapHandler(w HandlerWrapper) Option {
 	return func(o *Options) {
 		o.HdlrWrappers = append(o.HdlrWrappers, w)
+	}
+}
+
+// No register handler
+func Seen(s bool) Option {
+	return func(o *Options) {
+		if o.Context == nil {
+			o.Context = context.Background()
+		}
+		o.Context = context.WithValue(o.Context, seenKey{}, s)
 	}
 }

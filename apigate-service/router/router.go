@@ -30,4 +30,6 @@ type Router interface {
 	Close() error
 	// Route returns an api.Service route
 	Route(string, *http.Request) (*api.Service, error)
+	// Init initializes options
+	Init(...Option)
 }

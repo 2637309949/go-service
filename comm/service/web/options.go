@@ -76,6 +76,10 @@ func Handler(h http.Handler) web.Option {
 	return web.Handler(h)
 }
 
+func Seen(s bool) web.Option {
+	return web.Seen(s)
+}
+
 // Server for custom Server.
 func Server(srv *http.Server) web.Option {
 	return web.Server(srv)
@@ -153,3 +157,6 @@ func Logger(l logger.Logger) web.Option {
 func WrapHandler(w web.HandlerWrapper) web.Option {
 	return web.WrapHandler(w)
 }
+
+type HandlerFunc = web.HandlerFunc
+type HandlerWrapper = web.HandlerWrapper

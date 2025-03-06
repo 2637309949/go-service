@@ -59,7 +59,11 @@ func (a *h) String() string {
 	return "handler"
 }
 
-func NewHandler(opts ...Option) Handler {
+func (a *h) Options() Options {
+	return a.opts
+}
+
+func NewHandler(opts ...Option) *h {
 	options := NewOptions(opts...)
 	return &h{
 		opts: options,

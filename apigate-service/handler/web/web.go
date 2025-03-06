@@ -28,18 +28,18 @@ type webHandler struct {
 }
 
 func (wh *webHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	service, err := wh.getService(r)
+	service, addr, err := wh.getService(r)
 	if err != nil {
 		w.WriteHeader(500)
 		return
 	}
 
-	if len(service) == 0 {
+	if len(service) == 0 || len(addr) == 0 {
 		w.WriteHeader(404)
 		return
 	}
 
-	rp, err := url.Parse(service)
+	rp, err := url.Parse(addr)
 	if err != nil {
 		w.WriteHeader(500)
 		return
@@ -58,11 +58,12 @@ func (wh *webHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	nr := r.Clone(r.Context())
 	nr.URL.Path = strings.TrimPrefix(nr.URL.Path, wh.opts.ApiBase)
+	nr.URL.Path = strings.TrimPrefix(nr.URL.Path, fmt.Sprintf("/%s", service))
 	httputil.NewSingleHostReverseProxy(rp).ServeHTTP(w, nr)
 }
 
 // getService returns the service for this request from the selector
-func (wh *webHandler) getService(r *http.Request) (string, error) {
+func (wh *webHandler) getService(r *http.Request) (string, string, error) {
 	var service *api.Service
 
 	if wh.opts.Service != nil {
@@ -72,12 +73,12 @@ func (wh *webHandler) getService(r *http.Request) (string, error) {
 		// try get service from router
 		s, err := wh.opts.Router.Route(wh.opts.ApiBase, r)
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
 		service = s
 	} else {
 		// we have no way of routing the request
-		return "", errors.New("no route found")
+		return "", "", errors.New("no route found")
 	}
 
 	// create a random selector
@@ -86,10 +87,10 @@ func (wh *webHandler) getService(r *http.Request) (string, error) {
 	// get the next node
 	s, err := next()
 	if err != nil {
-		return "", nil
+		return "", "", nil
 	}
 
-	return fmt.Sprintf("http://%s", s.Address), nil
+	return service.Name, fmt.Sprintf("http://%s", s.Address), nil
 }
 
 // serveWebSocket used to serve a web socket proxied connection

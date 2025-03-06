@@ -11,12 +11,12 @@ require (
 	github.com/gin-contrib/cors v1.7.3
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/micro/plugins/v5/registry/consul v0.0.0-00010101000000-000000000000
 	github.com/micro/plugins/v5/wrapper/trace/opentracing v0.0.0-00010101000000-000000000000
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	go-micro.dev/v5 v5.2.0
+	proto v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -53,6 +53,7 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/micro/plugins/v5/registry/consul v0.0.0-00010101000000-000000000000 // indirect
 	github.com/micro/plugins/v5/source/consul v0.0.0-00010101000000-000000000000 // indirect
 	github.com/miekg/dns v1.1.50 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
@@ -80,7 +81,8 @@ require (
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.22.0 // indirect
-	google.golang.org/protobuf v1.36.3 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250204164813-702378808489 // indirect
+	google.golang.org/protobuf v1.36.4 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
@@ -91,4 +93,5 @@ replace (
 	github.com/micro/plugins/v5/source/consul => ../comm/plugins/source/consul
 	github.com/micro/plugins/v5/wrapper/trace/opentracing => ../comm/plugins/wrapper/trace/opentracing
 	go-micro.dev/v5 => ../comm/go-micro
+	proto => ../proto
 )
