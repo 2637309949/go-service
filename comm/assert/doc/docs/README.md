@@ -4,9 +4,14 @@
 
 ## 新增特性
 
-- RPC网关
+- v5+网关服务
+- 支持配置认证，多策略鉴权
 - HTTP `protoc` 插件
 - PROXY `protoc` 插件
+- WEB `protoc` 插件
+- 日志Trace
+- 默认Mysql，支持分表，db负载
+- 跨平台构建脚本
 - 企业架构拆箱即用
 - 更多特性在文档中描述
 
@@ -43,7 +48,7 @@ wget "$hub$releases"
 unzip consul_1.20.2_linux_amd64.zip
 ```
 
-启动 `consul`, 该部署指令仅用于测试, 不要用在生产上
+启动 `consul`（仅用于测试!）
 ```bash linenums="1"
 ./consul agent \
 -server \
