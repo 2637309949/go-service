@@ -1,4 +1,3 @@
-// Package web contains the web handler including websocket support
 package web
 
 import (
