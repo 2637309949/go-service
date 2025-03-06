@@ -75,6 +75,7 @@ func SetLockKey(lockKeY string) TimeInitOption {
 }
 
 func (t *timed) TimedInit(options ...TimeInitOption) (context.Context, *redislock.Lock, context.CancelFunc, error) {
+
 	for _, opt := range options {
 		opt(t)
 	}
@@ -93,6 +94,7 @@ func (t *timed) TimedInit(options ...TimeInitOption) (context.Context, *redisloc
 	if t.RedisClient == nil {
 		return nil, nil, nil, errors.New("redisClient is empty")
 	}
+
 	funcname := t.FuncName
 	dur := t.Dur
 	timeout := t.Timeout
@@ -109,21 +111,16 @@ func (t *timed) TimedInit(options ...TimeInitOption) (context.Context, *redisloc
 	}
 	defer span.Finish()
 
-	_, ok := logger.FromContext(ctx)
-	if !ok {
-		if md, ok := metadata.FromContext(ctx); ok {
-			if traceID, exists := md["Uber-Trace-Id"]; exists {
-				traceID = strings.Split(traceID, ":")[0]
-				l := logger.DefaultLogger.Fields(map[string]interface{}{"traceid": traceID})
-				ctx = logger.NewContext(ctx, l)
-			}
+	if md, ok := metadata.FromContext(ctx); ok {
+		if traceID, exists := md["Uber-Trace-Id"]; exists {
+			traceID = strings.Split(traceID, ":")[0]
+			l := logger.DefaultLogger.Fields(map[string]interface{}{"traceid": traceID, "timed": funcname})
+			ctx = logger.NewContext(ctx, l)
 		}
 	}
 
-	logger := logger.Extract(ctx)
 	env := config.CommConf("env")
 	if _, ok := t.LimitEnv[env]; !ok && len(t.LimitEnv) > 0 {
-		logger.Infof("======================= %s =======================", funcname)
 		err = fmt.Errorf("timed env err. cur [%s] limit [%s]", env, t.LimitEnvStr)
 		return ctx, nil, cancel, err
 	}
@@ -131,13 +128,10 @@ func (t *timed) TimedInit(options ...TimeInitOption) (context.Context, *redisloc
 	locker := redislock.New(redisClient)
 	lock, err := locker.Obtain(ctx, lockKey, dur, nil)
 	if err == redislock.ErrNotObtained {
-		logger.Infof("======================= %s =======================", funcname)
 		return ctx, nil, cancel, err
 	} else if err != nil {
 		return ctx, nil, cancel, err
 	}
-
-	logger.Infof("======================= %s obtained =======================", funcname)
 
 	return ctx, lock, cancel, err
 }

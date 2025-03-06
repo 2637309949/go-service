@@ -22,7 +22,6 @@ func Extract(ctx context.Context) *Helper {
 	if l, ok := FromContext(ctx); ok {
 		return NewHelper(l)
 	}
-
 	return NewHelper(DefaultLogger)
 }
 
