@@ -8,7 +8,7 @@ import "proto/user/user.proto";
 service UserService {
 	rpc QueryUser (UserFilter) returns (UserList) {
 		option (google.api.http) = {
-			get: "/QueryUser" // expose httpApi
+			get: "/QueryUser"
 			authorization: false
 			scope: "user"
 			body: "*"
@@ -16,7 +16,7 @@ service UserService {
 	}
 	rpc QueryUserDetail(UserFilter) returns (User) {
 		option (google.api.http) = {
-			get: "/QueryUserDetail" // expose httpApi
+			get: "/QueryUserDetail"
 			authorization: true
 			scope: "user"
 			body: "*"

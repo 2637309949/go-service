@@ -1,7 +1,7 @@
 package router
 
 import (
-	"apigate/auth"
+	pb "proto/apigate"
 	"context"
 	"errors"
 	"time"
@@ -30,7 +30,7 @@ type authClaims struct {
 // also cache
 type jwt struct{}
 
-func (a *jwt) Generate(ctx context.Context, acc *auth.Account, opts ...client.CallOption) (*auth.Token, error) {
+func (a *jwt) Generate(ctx context.Context, acc *pb.Account, opts ...client.CallOption) (*pb.Token, error) {
 	md, _ := metadata.FromContext(ctx)
 	secret := md["secret"]
 	host := md["Host"]
@@ -65,7 +65,7 @@ func (a *jwt) Generate(ctx context.Context, acc *auth.Account, opts ...client.Ca
 	}
 
 	// return the token
-	return &auth.Token{
+	return &pb.Token{
 		AccessToken:  tok,
 		RefreshToken: tok,
 		Expiry:       expiry.Unix(),
@@ -73,10 +73,10 @@ func (a *jwt) Generate(ctx context.Context, acc *auth.Account, opts ...client.Ca
 	}, nil
 }
 
-func (a *jwt) Inspect(ctx context.Context, token *auth.Token, opt ...client.CallOption) (*auth.Account, error) {
+func (a *jwt) Inspect(ctx context.Context, token *pb.Token, opt ...client.CallOption) (*pb.Account, error) {
 	md, _ := metadata.FromContext(ctx)
 	host := md["Host"]
-	acc := auth.Account{}
+	acc := pb.Account{}
 	switch host {
 	case "yourhost":
 	default:
@@ -85,20 +85,20 @@ func (a *jwt) Inspect(ctx context.Context, token *auth.Token, opt ...client.Call
 	return &acc, nil
 }
 
-func (a *jwt) Verify(ctx context.Context, ct *auth.Credential, opts ...client.CallOption) (*auth.Empty, error) {
+func (a *jwt) Verify(ctx context.Context, ct *pb.Credential, opts ...client.CallOption) (*pb.Empty, error) {
 	md, _ := metadata.FromContext(ctx)
 	host := md["Host"]
 	switch host {
 	case "yourhost":
 	default:
 	}
-	return &auth.Empty{}, nil
+	return &pb.Empty{}, nil
 }
 
-func (a *jwt) Refresh(ctx context.Context, tk *auth.Token, opts ...client.CallOption) (*auth.Token, error) {
+func (a *jwt) Refresh(ctx context.Context, tk *pb.Token, opts ...client.CallOption) (*pb.Token, error) {
 	md, _ := metadata.FromContext(ctx)
 	host := md["Host"]
-	acc := auth.Token{}
+	acc := pb.Token{}
 	switch host {
 	case "yourhost":
 	default:
@@ -106,6 +106,6 @@ func (a *jwt) Refresh(ctx context.Context, tk *auth.Token, opts ...client.CallOp
 	return &acc, nil
 }
 
-func NewJWT() auth.AuthService {
+func NewJWT() pb.AuthService {
 	return &jwt{}
 }

@@ -55,7 +55,19 @@ unzip consul_1.20.2_linux_amd64.zip
 -bootstrap-expect=1 \
 -http-port=8400 \
 -data-dir=comm/assert/data \
--bind="172.30.10.72" \
--advertise="172.30.10.72" \
+-bind="127.0.0.1" \
+-advertise="127.0.0.1" \
+-ui=true
+```
+
+window
+```bash linenums="1"
+./consul agent `
+-server `
+-bootstrap-expect=1 `
+-http-port=8400 `
+-data-dir=comm/assert/data `
+-bind="172.30.10.72" `
+-advertise="172.30.10.72" `
 -ui=true
 ```

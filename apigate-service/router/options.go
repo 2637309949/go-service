@@ -1,14 +1,14 @@
 package router
 
 import (
-	"apigate/auth"
+	pb "proto/apigate"
 
 	"go-micro.dev/v5/registry"
 )
 
 type Options struct {
 	Registry registry.Registry
-	Auth     auth.AuthService
+	Auth     pb.AuthService
 }
 
 type Option func(o *Options)
@@ -29,7 +29,7 @@ func WithRegistry(r registry.Registry) Option {
 	}
 }
 
-func WithAuth(auth auth.AuthService) Option {
+func WithAuth(auth pb.AuthService) Option {
 	return func(o *Options) {
 		o.Auth = auth
 	}

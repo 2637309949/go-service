@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+import "validate/validate.proto";
+
+option go_package = "/;apigate";
+
+service AuthService {
+	rpc Generate(Account) returns (Token) {}
+	rpc Inspect(Token) returns (Account) {}
+	rpc Verify(Credential) returns (Empty) {}
+	rpc Refresh(Token) returns (Token) {}
+}
+
+message Account {
+	string id = 1 [json_name = "id", (validate.rules).string.min_len = 1];
+	string name = 2 [json_name = "name"];
+	repeated string roles = 3 [json_name = "roles"];
+	string issuer = 4 [json_name = "issuer"];
+}
+
+message Token {
+    string access_token = 1 [json_name = "access_token"];
+    string refresh_token = 2 [json_name = "refresh_token"];
+    int64 created = 3 [json_name = "user_name"];
+    int64 expiry = 4 [json_name = "nick_name"];
+    string host = 5 [json_name = "host"];
+}
+
+message Credential {
+    string token = 1 [json_name = "access_token"];
+    string scope = 2 [json_name = "scope"];
+}
+
+message Empty {}

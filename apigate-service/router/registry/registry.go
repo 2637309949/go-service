@@ -2,13 +2,12 @@ package registry
 
 import (
 	"apigate/api"
-	"apigate/auth"
 	"apigate/router"
 	"errors"
 	"net/http"
 	"path"
 	"strings"
-
+	pb "proto/apigate"
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/registry/cache"
 )
@@ -100,12 +99,12 @@ func (r *registryRouter) auth(req *http.Request, rp *Endpoint) error {
 		if r.opts.Auth == nil {
 			return errors.New("no auth policy found")
 		}
-		_, err := r.opts.Auth.Inspect(cx, &auth.Token{AccessToken: rp.Token})
+		_, err := r.opts.Auth.Inspect(cx, &pb.Token{AccessToken: rp.Token})
 		if err != nil {
 			return err
 		}
 		if len(rp.Scope) > 0 {
-			_, err = r.opts.Auth.Verify(cx, &auth.Credential{Token: rp.Token, Scope: rp.Scope})
+			_, err = r.opts.Auth.Verify(cx, &pb.Credential{Token: rp.Token, Scope: rp.Scope})
 			if err != nil {
 				return err
 			}

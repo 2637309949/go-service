@@ -5,7 +5,6 @@ go 1.22.0
 toolchain go1.22.10
 
 require (
-	apigate/auth v0.0.0-00010101000000-000000000000
 	comm v0.0.0-00010101000000-000000000000
 	github.com/evanphx/json-patch/v5 v5.9.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
@@ -64,7 +63,6 @@ require (
 )
 
 replace (
-	apigate/auth => ../comm/proto/auth
 	comm => ../comm
 	github.com/micro/plugins/v5/registry/consul => ../comm/plugins/registry/consul
 	github.com/micro/plugins/v5/source/consul => ../comm/plugins/source/consul
