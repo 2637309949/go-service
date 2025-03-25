@@ -1,13 +1,13 @@
 package registry
 
 import (
-	"apigate/api"
 	"apigate/router"
 	"errors"
 	"net/http"
 	"path"
-	"strings"
 	pb "proto/apigate"
+	"strings"
+
 	"go-micro.dev/v5/registry"
 	"go-micro.dev/v5/registry/cache"
 )
@@ -53,15 +53,15 @@ func (r *registryRouter) Close() error {
 	return nil
 }
 
-func (r *registryRouter) Register(ep *api.Endpoint) error {
+func (r *registryRouter) Register(ep *router.Endpoint) error {
 	return nil
 }
 
-func (r *registryRouter) Deregister(ep *api.Endpoint) error {
+func (r *registryRouter) Deregister(ep *router.Endpoint) error {
 	return nil
 }
 
-func (r *registryRouter) Route(apiBase string, req *http.Request) (*api.Service, error) {
+func (r *registryRouter) Route(apiBase string, req *http.Request) (*router.Service, error) {
 	if r.isClosed() {
 		return nil, errors.New("router closed")
 	}
@@ -115,10 +115,10 @@ func (r *registryRouter) auth(req *http.Request, rp *Endpoint) error {
 	return nil
 }
 
-func (r *registryRouter) match(rp *Endpoint, services []*registry.Service) (*api.Service, error) {
-	sv := api.Service{
+func (r *registryRouter) match(rp *Endpoint, services []*registry.Service) (*router.Service, error) {
+	sv := router.Service{
 		Name:     rp.Name,
-		Endpoint: &api.Endpoint{},
+		Endpoint: &router.Endpoint{},
 		Services: services,
 	}
 

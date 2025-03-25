@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"strings"
 
-	"apigate/api"
+	"apigate/router"
 
 	"apigate/handler"
 
@@ -59,7 +59,7 @@ func (wh *webHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // getService returns the service for this request from the selector
 func (wh *webHandler) getService(r *http.Request) (string, string, error) {
-	var service *api.Service
+	var service *router.Service
 
 	if wh.opts.Service != nil {
 		// we were given the service

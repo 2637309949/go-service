@@ -1,4 +1,4 @@
-package api
+package router
 
 import (
 	"go-micro.dev/v5/registry"

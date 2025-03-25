@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"apigate/api"
+	"apigate/router"
 	"apigate/util"
 	"net/http"
 
@@ -25,7 +25,7 @@ type h struct {
 }
 
 func (a *h) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var service *api.Service
+	var service *router.Service
 
 	if a.opts.Service != nil {
 		service = a.opts.Service

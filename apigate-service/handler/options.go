@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"apigate/api"
 	"apigate/router"
 
 	"go-micro.dev/v5/client"
@@ -16,7 +15,7 @@ type Options struct {
 	Namespace   string
 	Router      router.Router
 	Client      client.Client
-	Service     *api.Service
+	Service     *router.Service
 	Handlers    map[string]Handler
 	ApiBase     string
 }
@@ -83,7 +82,7 @@ func WithWrapCall(cw ...client.CallWrapper) Option {
 	}
 }
 
-func WithService(s *api.Service) Option {
+func WithService(s *router.Service) Option {
 	return func(o *Options) {
 		o.Service = s
 	}

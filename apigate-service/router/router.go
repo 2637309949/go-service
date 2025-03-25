@@ -1,7 +1,6 @@
 package router
 
 import (
-	"apigate/api"
 	"net/http"
 )
 
@@ -12,7 +11,7 @@ type Router interface {
 	// Stop the router
 	Close() error
 	// Route returns an api.Service route
-	Route(string, *http.Request) (*api.Service, error)
+	Route(string, *http.Request) (*Service, error)
 	// Init initializes options
 	Init(...Option)
 }

@@ -13,6 +13,7 @@ func WrapCors() web.HandlerWrapper {
 			}
 			w.Header().Set(k, v)
 		}
+
 		return func(w http.ResponseWriter, r *http.Request) {
 			if origin := r.Header.Get("Origin"); len(origin) > 0 {
 				set(w, "Access-Control-Allow-Origin", origin)
@@ -26,6 +27,7 @@ func WrapCors() web.HandlerWrapper {
 			if r.Method == "OPTIONS" {
 				return
 			}
+		
 			h(w, r)
 		}
 	}

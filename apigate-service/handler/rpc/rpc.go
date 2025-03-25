@@ -1,7 +1,7 @@
 package rpc
 
 import (
-	"apigate/api"
+	"apigate/router"
 	"apigate/handler"
 	"apigate/util"
 	bts "bytes"
@@ -68,7 +68,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
-	var service *api.Service
+	var service *router.Service
 	if h.opts.Service != nil {
 		service = h.opts.Service
 	} else if h.opts.Router != nil {
