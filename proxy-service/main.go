@@ -13,12 +13,13 @@ var (
 )
 
 func main() {
-	r := http.NewSingleHostRouter()
-	r.RegisterEndpoint("MicroService.Home", homeUrl)
-	r.RegisterEndpoint("MeiZuService.ListWeather", listWeatherUrl)
+	router := http.NewSingleHostRouter()
+	router.RegisterEndpoint("MicroService.Home", homeUrl)
+	router.RegisterEndpoint("MeiZuService.ListWeather", listWeatherUrl)
+
 	service := service.NewService(
 		service.Name("proxy"),
-		service.Router(r),
+		service.Router(router),
 	)
 	pbProxy.RegisterMicroServiceProxy(service.Server())
 	pbProxy.RegisterMeiZuServiceProxy(service.Server())
