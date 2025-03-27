@@ -76,10 +76,6 @@ func Handler(h http.Handler) web.Option {
 	return web.Handler(h)
 }
 
-func NoSeen(s bool) web.Option {
-	return web.NoSeen(s)
-}
-
 // Server for custom Server.
 func Server(srv *http.Server) web.Option {
 	return web.Server(srv)

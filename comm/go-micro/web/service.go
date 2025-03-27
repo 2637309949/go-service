@@ -316,10 +316,21 @@ func (s *service) Client() *http.Client {
 	}
 }
 
-func (s *service) Handle(pattern string, handler http.Handler, opts ...Option) {
-	options := newOptions(opts...)
-	seen, _ := options.Context.Value(noSeenKey{}).(bool)
+func (s *service) NoSeen(pattern string, handler http.Handler) {
+	// execute the wrapper for it
+	hsp := handler.ServeHTTP
+	for i := len(s.opts.HdlrWrappers); i > 0; i-- {
+		hsp = s.opts.HdlrWrappers[i-1](hsp)
+	}
 
+	handler = &serve{hsp}
+	// register the handler
+	// s.mux.Handle(fmt.Sprintf("/%s%s", s.Name(), pattern), handler)
+	s.mux.Handle(pattern, handler)
+}
+
+func (s *service) Handle(pattern string, handler http.Handler) {
+	var seen bool
 	s.RLock()
 	for _, ep := range s.srv.Endpoints {
 		if ep.Path == pattern {
@@ -361,9 +372,8 @@ func (s *service) Handle(pattern string, handler http.Handler, opts ...Option) {
 	s.mux.Handle(pattern, handler)
 }
 
-func (s *service) HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request), opts ...Option) {
-	options := newOptions(opts...)
-	seen, _ := options.Context.Value(noSeenKey{}).(bool)
+func (s *service) HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
+	var seen bool
 
 	s.RLock()
 	for _, ep := range s.srv.Endpoints {

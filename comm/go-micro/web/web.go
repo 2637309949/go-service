@@ -15,8 +15,9 @@ type Service interface {
 	Client() *http.Client
 	Init(opts ...Option) error
 	Options() Options
-	Handle(pattern string, handler http.Handler, opts ...Option)
-	HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request), opts ...Option)
+	Handle(pattern string, handler http.Handler)
+	NoSeen(pattern string, handler http.Handler)
+	HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request))
 	Start() error
 	Stop() error
 	Run() error

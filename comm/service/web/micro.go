@@ -43,6 +43,7 @@ func NewService(opts ...web.Option) web.Service {
 	opts = append(opts, Context(ctx))
 	opts = append(opts, WrapHandler(loggerWrapper(logger.DefaultLogger)))
 	opts = append(opts, WrapHandler(loggerHandler))
+	opts = append(opts, WrapHandler(corsWrapper))
 	service := &service{web.NewService(
 		opts...,
 	)}

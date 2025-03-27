@@ -2,40 +2,20 @@ package web
 
 import (
 	"comm/logger"
-	"context"
 	"net/http"
-	"net/textproto"
 	"strings"
 
 	trace "github.com/micro/plugins/v5/wrapper/trace/opentracing"
+	uhttp "go-micro.dev/v5/util/http"
 
 	"github.com/opentracing/opentracing-go"
 	"go-micro.dev/v5/metadata"
 	"go-micro.dev/v5/web"
 )
 
-func FromRequest(r *http.Request) context.Context {
-	ctx := r.Context()
-	md, ok := metadata.FromContext(ctx)
-	if !ok {
-		md = make(metadata.Metadata)
-	}
-	for k, v := range r.Header {
-		md[textproto.CanonicalMIMEHeaderKey(k)] = strings.Join(v, ",")
-	}
-	// pass http host
-	md["Host"] = r.Host
-	// pass http method
-	md["Method"] = r.Method
-	if r.URL != nil {
-		md["URL"] = r.URL.String()
-	}
-	return metadata.NewContext(ctx, md)
-}
-
 func loggerHandler(h web.HandlerFunc) web.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cx := FromRequest(r)
+		cx := uhttp.FromRequest(r)
 		logger := logger.Extract(cx)
 		fields := map[string]interface{}{}
 		if md, ok := metadata.FromContext(cx); ok {
@@ -58,7 +38,7 @@ func NewTracerWrapper(ot opentracing.Tracer) web.HandlerWrapper {
 			if ot == nil {
 				ot = opentracing.GlobalTracer()
 			}
-			cx := FromRequest(r)
+			cx := uhttp.FromRequest(r)
 			logger := logger.Extract(cx)
 			name := ""
 			md, ok := metadata.FromContext(cx)
@@ -83,7 +63,7 @@ func loggerWrapper(l logger.Logger) web.HandlerWrapper {
 	}
 	return func(h web.HandlerFunc) web.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			cx := FromRequest(r)
+			cx := uhttp.FromRequest(r)
 			_, ok := logger.FromContext(cx)
 			if !ok {
 				if md, ok := metadata.FromContext(cx); ok {
@@ -99,4 +79,30 @@ func loggerWrapper(l logger.Logger) web.HandlerWrapper {
 			h(w, r)
 		}
 	}
+}
+
+func corsWrapper(h web.HandlerFunc) web.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if origin := r.Header.Get("Origin"); len(origin) > 0 {
+			setHeader(w, "Access-Control-Allow-Origin", origin)
+		} else {
+			setHeader(w, "Access-Control-Allow-Origin", "*")
+		}
+		setHeader(w, "Access-Control-Allow-Credentials", "true")
+		setHeader(w, "Access-Control-Allow-Methods", "POST, PATCH, GET, OPTIONS, PUT, DELETE")
+		setHeader(w, "Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Micro-Namespace")
+
+		if r.Method == "OPTIONS" {
+			return
+		}
+
+		h(w, r)
+	}
+}
+
+func setHeader(w http.ResponseWriter, k, v string) {
+	if v := w.Header().Get(k); len(v) > 0 {
+		return
+	}
+	w.Header().Set(k, v)
 }
