@@ -1,8 +1,8 @@
 package rpc
 
 import (
-	"apigate/router"
 	"apigate/handler"
+	"apigate/router"
 	"apigate/util"
 	bts "bytes"
 	"encoding/json"
@@ -13,6 +13,7 @@ import (
 	"go-micro.dev/v5/codec/bytes"
 	"go-micro.dev/v5/errors"
 	"go-micro.dev/v5/metadata"
+	uhttp "go-micro.dev/v5/util/http"
 )
 
 var (
@@ -56,7 +57,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, bsize)
 
 	// create context
-	cx := util.FromRequest(r)
+	cx := uhttp.FromRequest(r)
 	// strip headers grpc doesn't like
 	md, _ := metadata.FromContext(cx)
 	// delete websocket info
