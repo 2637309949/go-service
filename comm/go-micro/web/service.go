@@ -2,6 +2,7 @@ package web
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -326,7 +327,7 @@ func (s *service) NoSeen(pattern string, handler http.Handler) {
 	handler = &serve{hsp}
 	// register the handler
 	// s.mux.Handle(fmt.Sprintf("/%s%s", s.Name(), pattern), handler)
-	s.mux.Handle(pattern, handler)
+	s.mux.Handle(fmt.Sprintf("%s/", pattern), handler)
 }
 
 func (s *service) Handle(pattern string, handler http.Handler) {

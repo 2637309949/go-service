@@ -8,7 +8,6 @@ import (
 	"apigate/router/registry"
 	"comm/config"
 	wb "comm/service/web"
-	"fmt"
 	pb "proto/apigate"
 )
 
@@ -34,7 +33,7 @@ func main() {
 	hd := handler.NewHandler(opts...)
 
 	// r.Init(router.WithRegistry(service.Options().Registry))
-	service.NoSeen(fmt.Sprintf("%s/", apiBase), hd)
+	service.NoSeen(apiBase, hd)
 
 	// register handler
 	pb.RegisterApigateServiceHandler(service, hd)
