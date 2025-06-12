@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+option go_package = "/;dtm";
+
+import "google/api/annotations.proto";
+import "proto/dtm/busi.proto";
+
+message Empty{}
+
+// 对外暴露dtm业务服务
+service DtmService {
+	rpc WorkflowGrpc(BusiReq) returns (BusiReply) {
+		option (google.api.http) = {
+			get: "/workflowGrpc"
+			authorization: false
+			scope: "test"
+			body: "*"
+		};
+	}
+}
+
+// 用workflow代理本地事务, 方便管理，以及记录日志
+service WorkflowService {
+	rpc TransResume (BusiReq) returns (BusiReply) {
+		option (google.api.http) = {
+			post: "/transResume"
+			authorization: false
+			scope: "test"
+			body: "*"
+		};
+	}
+	rpc TransOut (BusiReq) returns (BusiReply) {
+		option (google.api.http) = {
+			post: "/transOut"
+			authorization: false
+			scope: "test"
+			body: "*"
+		};
+	}
+	rpc TransOutRevert (BusiReq) returns (BusiReply) {
+		option (google.api.http) = {
+			post: "/transOutRevert"
+			authorization: false
+			scope: "test"
+			body: "*"
+		};
+	}
+	rpc TransIn (BusiReq) returns (BusiReply) {
+		option (google.api.http) = {
+			post: "/transIn"
+			authorization: false
+			scope: "test"
+			body: "*"
+		};
+	}
+	rpc TransInRevert (BusiReq) returns (BusiReply) {
+		option (google.api.http) = {
+			post: "/transInRevert"
+			authorization: false
+			scope: "test"
+			body: "*"
+		};
+	}
+}
