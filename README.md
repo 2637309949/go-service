@@ -71,3 +71,9 @@ window
 -advertise="172.30.10.72" `
 -ui=true
 ```
+
+## 可观测性建设（todo）
+1. 日志系统（ELK / Loki）  
+2. 监控系统（Prometheus / Grafana）  
+3. 链路追踪（Jaeger / Zipkin / Skywalking）  
+4. 告警机制（Webhook / 邮件 / 飞书）  
